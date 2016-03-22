@@ -64,6 +64,8 @@ using ReturnType = typename ReturnTypeImpl<T>::Type;
  */
 #define MOCK_STORAGE(func) decltype(mock_##func) mock_##func = func
 
+#define UT_ARG(N) arg_##N
+
 
 #define IMPL_MOCK_0(func) \
     MOCK_STORAGE(func); \
@@ -71,17 +73,23 @@ using ReturnType = typename ReturnTypeImpl<T>::Type;
         return mock_##func(); \
     }
 
-#define IMPL_MOCK_1(func, T1) \
+#define IMPL_MOCK_1(func, T0) \
     MOCK_STORAGE(func); \
-    extern "C" ReturnType<decltype(&func)> ut_##func(T1 a1) { \
-        return mock_##func(a1); \
+    extern "C" ReturnType<decltype(&func)> ut_##func(T0 UT_ARG(0)) { \
+        return mock_##func(UT_ARG(0)); \
+    }
+
+#define IMPL_MOCK_2(func, T0, T1) \
+    MOCK_STORAGE(func); \
+    extern "C" ReturnType<decltype(&func)> ut_##func(T0 UT_ARG(0), T1 UT_ARG(1)) { \
+        return mock_##func(UT_ARG(0), UT_ARG(1)); \
     }
 
 
-#define IMPL_MOCK_4(func, T1, T2, T3, T4) \
+#define IMPL_MOCK_4(func, T0, T1, T2, T3)    \
     MOCK_STORAGE(func); \
-    extern "C" ReturnType<decltype(&func)> ut_##func(T1 a1, T2 a2, T3 a3, T4 a4) { \
-        return mock_##func(a1, a2, a3, a4); \
+    extern "C" ReturnType<decltype(&func)> ut_##func(T0 a0, T1 a1, T2 a2, T3 a3) { \
+        return mock_##func(a0, a1, a2, a3); \
     }
 
 

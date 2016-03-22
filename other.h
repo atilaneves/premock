@@ -3,7 +3,7 @@
 
 int zero_func();
 int one_func(int);
-
+int two_func(int, int);
 
 
 #endif // OTHER_H_

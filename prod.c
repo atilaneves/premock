@@ -17,3 +17,7 @@ int prod_zero() {
 int prod_one(int i) {
     return one_func(i + 1);
 }
+
+int prod_two(int i, int j) {
+    return two_func(i - 1, j + 1);
+}

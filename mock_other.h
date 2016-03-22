@@ -9,6 +9,7 @@ extern "C" {
 #ifndef DISABLE_MOCKS
 #    define zero_func ut_zero_func
 #    define one_func ut_one_func
+#    define two_func ut_two_func
 #endif
 
 #include "other.h"

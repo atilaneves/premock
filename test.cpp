@@ -23,7 +23,12 @@ int main() {
     {
         auto _ = MOCK(one_func, [](int i) { return 4 * i; });
         const auto res = prod_one(8);
-        if(res != 36) throw runtime_error("Unexpected zero value: " + to_string(res));
+        if(res != 36) throw runtime_error("Unexpected one value: " + to_string(res));
+    }
+    {
+        auto _ = MOCK(two_func, [](int i, int j) { return i + j + 1; });
+        const auto res = prod_two(3, 4);
+        if(res != 8) throw runtime_error("Unexpected two value: " + to_string(res));
     }
 
 }
