@@ -1,5 +1,4 @@
-#include "mock.h"
-#include "MockScope.hpp"
+#include "mock.hpp"
 #include "prod.h"
 #include <iostream>
 #include <string>
@@ -8,8 +7,6 @@
 
 
 using namespace std;
-
-extern function<ssize_t(int, const void *, size_t, int)> mock_send;
 
 
 int main() {

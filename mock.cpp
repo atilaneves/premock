@@ -1,8 +1,6 @@
-#include "mock.h"
-#include <functional>
+#include "mock.hpp"
 
 using namespace std;
-
 
 function<ssize_t(int, const void *, size_t, int)> mock_send = send;
 
