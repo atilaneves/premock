@@ -77,36 +77,17 @@ struct FunctionTraits<R(*)(A...)> {
 #define UT_FWD_4 UT_FWD_3, UT_ARG(3)
 
 
-
-#define IMPL_MOCK_0(func) \
+#define IMPL_MOCK(func, num_args) \
     MOCK_STORAGE(func); \
-    extern "C" FunctionTraits<decltype(&func)>::ReturnType ut_##func(UT_ARGS_0(func)) { \
-        return mock_##func(UT_FWD_0); \
+    extern "C" FunctionTraits<decltype(&func)>::ReturnType ut_##func(UT_ARGS_##num_args(func)) { \
+        return mock_##func(UT_FWD_##num_args); \
     }
 
-#define IMPL_MOCK_1(func) \
-    MOCK_STORAGE(func); \
-    extern "C" FunctionTraits<decltype(&func)>::ReturnType ut_##func(UT_ARGS_1(func)) { \
-        return mock_##func(UT_FWD_1); \
-    }
-
-#define IMPL_MOCK_2(func) \
-    MOCK_STORAGE(func); \
-    extern "C" FunctionTraits<decltype(&func)>::ReturnType ut_##func(UT_ARGS_2(func)) { \
-        return mock_##func(UT_FWD_2); \
-    }
-
-#define IMPL_MOCK_3(func) \
-    MOCK_STORAGE(func); \
-    extern "C" FunctionTraits<decltype(&func)>::ReturnType ut_##func(UT_ARGS_3(func)) { \
-        return mock_##func(UT_FWD_3); \
-    }
-
-#define IMPL_MOCK_4(func) \
-    MOCK_STORAGE(func); \
-    extern "C" FunctionTraits<decltype(&func)>::ReturnType ut_##func(UT_ARGS_4(func)) { \
-        return mock_##func(UT_FWD_4); \
-    }
+#define IMPL_MOCK_0(func) IMPL_MOCK(func, 0)
+#define IMPL_MOCK_1(func) IMPL_MOCK(func, 1)
+#define IMPL_MOCK_2(func) IMPL_MOCK(func, 2)
+#define IMPL_MOCK_3(func) IMPL_MOCK(func, 3)
+#define IMPL_MOCK_4(func) IMPL_MOCK(func, 4)
 
 
 
