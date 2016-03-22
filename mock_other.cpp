@@ -1,5 +1,5 @@
 #include "mock_other.hpp"
 
-IMPL_MOCK_0(zero_func)
-IMPL_MOCK_1(one_func)
-IMPL_MOCK_2(two_func)
+IMPL_MOCK(0, zero_func)
+IMPL_MOCK(1, one_func)
+IMPL_MOCK(2, two_func)

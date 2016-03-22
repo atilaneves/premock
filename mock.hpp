@@ -16,6 +16,7 @@ template<typename R, typename... A>
 struct FunctionTraits<R(*)(A...)> {
     using StdFunctionType = std::function<R(A...)>;
     using ReturnType = R;
+    enum { Arity = sizeof...(A) };
 
     template<int N>
     struct Arg {
@@ -77,18 +78,11 @@ struct FunctionTraits<R(*)(A...)> {
 #define UT_FWD_4 UT_FWD_3, UT_ARG(3)
 
 
-#define IMPL_MOCK(func, num_args) \
+#define IMPL_MOCK(num_args, func) \
     MOCK_STORAGE(func); \
-    extern "C" FunctionTraits<decltype(&func)>::ReturnType ut_##func(UT_ARGS_##num_args(func)) { \
+    extern "C" FunctionTraits<decltype(&func)>::ReturnType ut_##func(PP_JOIN(UT_ARGS_, num_args)(func)) { \
         return mock_##func(UT_FWD_##num_args); \
     }
-
-#define IMPL_MOCK_0(func) IMPL_MOCK(func, 0)
-#define IMPL_MOCK_1(func) IMPL_MOCK(func, 1)
-#define IMPL_MOCK_2(func) IMPL_MOCK(func, 2)
-#define IMPL_MOCK_3(func) IMPL_MOCK(func, 3)
-#define IMPL_MOCK_4(func) IMPL_MOCK(func, 4)
-
 
 
 #endif // MOCK_HPP_
