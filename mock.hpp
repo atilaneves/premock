@@ -74,8 +74,9 @@ struct FunctionTraits<R(*)(A...)> {
 
 #define IMPL_MOCK_4(func, T0, T1, T2, T3)    \
     MOCK_STORAGE(func); \
-    extern "C" FunctionTraits<decltype(&func)>::ReturnType ut_##func(T0 a0, T1 a1, T2 a2, T3 a3) { \
-        return mock_##func(a0, a1, a2, a3); \
+    extern "C" FunctionTraits<decltype(&func)>::ReturnType \
+    ut_##func(UT_TYPE_AND_ARG(func, 0), UT_TYPE_AND_ARG(func, 1), UT_TYPE_AND_ARG(func, 2), UT_TYPE_AND_ARG(func, 3)) { \
+        return mock_##func(UT_ARG(0), UT_ARG(1), UT_ARG(2), UT_ARG(3)); \
     }
 
 
