@@ -3,8 +3,7 @@
 
 #include "mock.hpp"
 #include "mock_network.h"
-#include <functional>
 
-DECL_MOCK(send, int, const void*, size_t, int);
+DECL_MOCK(send);
 
 #endif // MOCK_NETWORK_HPP_

@@ -6,16 +6,24 @@
 #include <functional>
 #include <type_traits>
 
-template <typename F>
-struct ReturnTypeImpl;
+
+template<typename F>
+struct StdFunctionTypeImpl;
 
 template<typename R, typename... A>
-struct ReturnTypeImpl<R(*)(A...)> {
-    using Type = R;
+struct StdFunctionTypeImpl<R(*)(A...)> {
+    using Type = std::function<R(A...)>;
 };
 
-template<typename T>
-using ReturnType = typename ReturnTypeImpl<T>::Type;
+/**
+ Alias for the std::function type corresponding to the function pointer
+ type F, e.g.
+
+ int foo(int, float);
+ static_assert(std::is_same<StdFunctionType<decltype(&foo)>, std::function<int(int, float>>);
+ */
+template<typename F>
+using StdFunctionType = typename StdFunctionTypeImpl<F>::Type;
 
 
 /**
@@ -28,12 +36,21 @@ using ReturnType = typename ReturnTypeImpl<T>::Type;
 #define MOCK(func, lambda) mockScope(mock_##func, lambda)
 
 /**
- Enables mocking by declaring the std::function that will be
- called by the production code.
+ Declares a mock function. The parameters are the function name and
+ the types of its parameters. This is simply the declaration, the
+ implementation is done with IMPL_MOCK. e.g.
+ int foo(int, float);
+ extern std::function<int(int, float)> mock_foo;
+ */
+#define DECL_MOCK(func) extern StdFunctionType<decltype(&func)> mock_##func
+
+/**
+ Definition of the std::function that will store the implementation.
+ Defaults to the "real" function. e.g.
+ int foo(int, float);
+ std::function<int(int, float)> mock_foo = foo;
  */
 #define MOCK_STORAGE(func) decltype(mock_##func) mock_##func = func
-
-#define DECL_MOCK(func, ...) extern std::function<ReturnType<decltype(&func)>(__VA_ARGS__)> mock_##func
 
 #define IMPL_MOCK_4(func, R, T1, T2, T3, T4) \
     MOCK_STORAGE(func); \
