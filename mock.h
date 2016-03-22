@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include <sys/socket.h>
+#include <sys/socket.h> //ssize_t
 
 ssize_t ut_send(int socket, const void *buffer, size_t length, int flags);
 
