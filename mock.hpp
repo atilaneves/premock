@@ -5,7 +5,8 @@
 
 ssize_t ut_send(int socket, const void *buffer, size_t length, int flags);
 
-#define send ut_send
-
+#ifndef DISABLE_MOCKS
+#    define send ut_send
+#endif
 
 #endif // MOCK_HPP_
