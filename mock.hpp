@@ -5,6 +5,7 @@
 #include "MockScope.hpp"
 #include <functional>
 #include <type_traits>
+#include <tuple>
 
 
 template<typename F>
@@ -14,6 +15,11 @@ template<typename R, typename... A>
 struct FunctionTraits<R(*)(A...)> {
     using StdFunctionType = std::function<R(A...)>;
     using ReturnType = R;
+
+    template<int N>
+    struct Arg {
+        using Type = std::remove_reference_t<decltype(std::get<N>(std::tuple<A...>()))>;
+    };
 };
 
 
@@ -52,9 +58,9 @@ struct FunctionTraits<R(*)(A...)> {
         return mock_##func(); \
     }
 
-#define IMPL_MOCK_1(func, T0) \
+#define IMPL_MOCK_1(func) \
     MOCK_STORAGE(func); \
-    extern "C" FunctionTraits<decltype(&func)>::ReturnType ut_##func(T0 UT_ARG(0)) { \
+    extern "C" FunctionTraits<decltype(&func)>::ReturnType ut_##func(FunctionTraits<decltype(&func)>::Arg<0>::Type UT_ARG(0)) { \
         return mock_##func(UT_ARG(0)); \
     }
 
