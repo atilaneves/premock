@@ -21,8 +21,7 @@
  */
 #define MOCK_STORAGE(func) decltype(mock_##func) mock_##func = func
 
-#define DECL_MOCK_4(func, R, T1, T2, T3, T4) \
-    extern std::function<R(T1, T2, T3, T4)> mock_##func
+#define DECL_MOCK(func, R, ...) extern std::function<R(__VA_ARGS__)> mock_##func
 
 #define IMPL_MOCK_4(func, R, T1, T2, T3, T4) \
     MOCK_STORAGE(func); \
