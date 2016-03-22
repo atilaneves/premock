@@ -5,6 +5,6 @@
 #include "mock_network.h"
 #include <functional>
 
-extern std::function<ssize_t(int, const void *, size_t, int)> mock_send;
+DECL_MOCK_4(send, ssize_t, int, const void*, size_t, int);
 
 #endif // MOCK_NETWORK_HPP_

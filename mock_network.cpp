@@ -2,8 +2,4 @@
 
 using namespace std;
 
-IMPL_MOCK(send);
-
-ssize_t ut_send(int socket, const void *buffer, size_t length, int flags) {
-    return mock_send(socket, buffer, length, flags);
-}
+IMPL_MOCK_4(send, ssize_t, int, const void*, size_t, int)

@@ -19,7 +19,17 @@
  Enables mocking by declaring the std::function that will be
  called by the production code.
  */
-#define IMPL_MOCK(func) decltype(mock_##func) mock_##func = func
+#define MOCK_STORAGE(func) decltype(mock_##func) mock_##func = func
+
+#define DECL_MOCK_4(func, R, T1, T2, T3, T4) \
+    extern std::function<R(T1, T2, T3, T4)> mock_##func
+
+#define IMPL_MOCK_4(func, R, T1, T2, T3, T4) \
+    MOCK_STORAGE(func); \
+    R ut_##func(T1 a1, T2 a2, T3 a3, T4 a4) { \
+        return mock_##func(a1, a2, a3, a4); \
+    }
+
 
 
 #endif // MOCK_HPP_
