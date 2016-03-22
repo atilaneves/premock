@@ -25,6 +25,18 @@ struct StdFunctionTypeImpl<R(*)(A...)> {
 template<typename F>
 using StdFunctionType = typename StdFunctionTypeImpl<F>::Type;
 
+template <typename F>
+struct ReturnTypeImpl;
+
+template<typename R, typename... A>
+struct ReturnTypeImpl<R(*)(A...)> {
+    using Type = R;
+};
+
+template<typename T>
+using ReturnType = typename ReturnTypeImpl<T>::Type;
+
+
 
 /**
  Temporarily replace func with the passed-in lambda:
@@ -52,9 +64,9 @@ using StdFunctionType = typename StdFunctionTypeImpl<F>::Type;
  */
 #define MOCK_STORAGE(func) decltype(mock_##func) mock_##func = func
 
-#define IMPL_MOCK_4(func, R, T1, T2, T3, T4) \
+#define IMPL_MOCK_4(func, T1, T2, T3, T4) \
     MOCK_STORAGE(func); \
-    R ut_##func(T1 a1, T2 a2, T3 a3, T4 a4) { \
+    ReturnType<decltype(&func)> ut_##func(T1 a1, T2 a2, T3 a3, T4 a4) { \
         return mock_##func(a1, a2, a3, a4); \
     }
 
