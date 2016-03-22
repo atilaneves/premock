@@ -13,3 +13,7 @@ int prod_send(int fd) {
 int prod_zero() {
     return zero_func();
 }
+
+int prod_one(int i) {
+    return one_func(i + 1);
+}

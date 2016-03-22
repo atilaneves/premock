@@ -7,6 +7,7 @@ extern "C" {
 
 int prod_send(int fd);
 int prod_zero();
+int prod_one(int i);
 
 #ifdef __cplusplus
 }

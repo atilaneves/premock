@@ -20,4 +20,10 @@ int main() {
         const auto res = prod_zero();
         if(res != 3) throw runtime_error("Unexpected zero value: " + to_string(res));
     }
+    {
+        auto _ = MOCK(one_func, [](int i) { return 4 * i; });
+        const auto res = prod_one(8);
+        if(res != 36) throw runtime_error("Unexpected zero value: " + to_string(res));
+    }
+
 }
