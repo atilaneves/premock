@@ -5,6 +5,6 @@
 #include "mock_network.h"
 #include <functional>
 
-DECL_MOCK(send, ssize_t, int, const void*, size_t, int);
+DECL_MOCK(send, int, const void*, size_t, int);
 
 #endif // MOCK_NETWORK_HPP_

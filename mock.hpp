@@ -4,6 +4,18 @@
 
 #include "MockScope.hpp"
 #include <functional>
+#include <type_traits>
+
+template <typename F>
+struct ReturnTypeImpl;
+
+template<typename R, typename... A>
+struct ReturnTypeImpl<R(*)(A...)> {
+    using Type = R;
+};
+
+template<typename T>
+using ReturnType = typename ReturnTypeImpl<T>::Type;
 
 
 /**
@@ -21,7 +33,7 @@
  */
 #define MOCK_STORAGE(func) decltype(mock_##func) mock_##func = func
 
-#define DECL_MOCK(func, R, ...) extern std::function<R(__VA_ARGS__)> mock_##func
+#define DECL_MOCK(func, ...) extern std::function<ReturnType<decltype(&func)>(__VA_ARGS__)> mock_##func
 
 #define IMPL_MOCK_4(func, R, T1, T2, T3, T4) \
     MOCK_STORAGE(func); \
