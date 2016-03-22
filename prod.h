@@ -5,7 +5,8 @@
 extern "C" {
 #endif
 
-int func(int fd);
+int prod_send(int fd);
+int prod_zero();
 
 #ifdef __cplusplus
 }

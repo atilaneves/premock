@@ -1,4 +1,4 @@
-#include "mock_network.hpp"
+#include "mocks.hpp"
 #include "prod.h"
 #include <iostream>
 #include <string>
@@ -10,8 +10,14 @@ using namespace std;
 
 
 int main() {
-    auto mysend = MOCK(send, [](auto...) { return 7; });
-    const auto res = func(42);
-    if(res != 7) throw runtime_error("Unexpected value: " + to_string(res));
-    cout << "Result was " << res << endl;
+    {
+        auto _ = MOCK(send, [](auto...) { return 7; });
+        const auto res = prod_send(42);
+        if(res != 7) throw runtime_error("Unexpected send value: " + to_string(res));
+    }
+    {
+        auto _ = MOCK(zero_func, []() { return 3; });
+        const auto res = prod_zero();
+        if(res != 3) throw runtime_error("Unexpected zero value: " + to_string(res));
+    }
 }
