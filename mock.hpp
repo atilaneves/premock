@@ -2,6 +2,7 @@
 #define MOCK_HPP_
 
 
+#include "pp_macros.h"
 #include "MockScope.hpp"
 #include <functional>
 #include <type_traits>
@@ -49,30 +50,48 @@ struct FunctionTraits<R(*)(A...)> {
  */
 #define MOCK_STORAGE(func) decltype(mock_##func) mock_##func = func
 
-#define UT_ARG(N) arg_##N
+/**
+ A name for the ut_ function argument at position index
+ */
+#define UT_ARG(index) arg_##index
+
+/**
+ Type and name for ut_ function argument at position index
+ */
 #define UT_TYPE_AND_ARG(func, index) FunctionTraits<decltype(&func)>::Arg<index>::Type UT_ARG(index)
+
+
+#define UT_ARGS_0(func)
+#define UT_FWD_0()
+
+#define UT_ARGS_1(func) UT_ARGS_0(func) UT_TYPE_AND_ARG(func, 0)
+#define UT_FWD_1() UT_FWD_0() UT_ARG(0)
+
+#define UT_ARGS_2(func) UT_ARGS_1(func) UT_TYPE_AND_ARG(func, 1)
+#define UT_FWD_2() UT_FWD_1() UT_ARG(1)
+
 
 
 #define IMPL_MOCK_0(func) \
     MOCK_STORAGE(func); \
-    extern "C" FunctionTraits<decltype(&func)>::ReturnType ut_##func() {  \
-        return mock_##func(); \
+    extern "C" FunctionTraits<decltype(&func)>::ReturnType ut_##func(UT_ARGS_0(func)) { \
+        return mock_##func(UT_FWD_0()); \
     }
 
 #define IMPL_MOCK_1(func) \
     MOCK_STORAGE(func); \
-    extern "C" FunctionTraits<decltype(&func)>::ReturnType ut_##func(UT_TYPE_AND_ARG(func, 0)) { \
-        return mock_##func(UT_ARG(0)); \
+    extern "C" FunctionTraits<decltype(&func)>::ReturnType ut_##func(UT_ARGS_1(func)) { \
+        return mock_##func(UT_FWD_1()); \
     }
 
-#define IMPL_MOCK_2(func, T0, T1) \
+#define IMPL_MOCK_2(func) \
     MOCK_STORAGE(func); \
     extern "C" FunctionTraits<decltype(&func)>::ReturnType ut_##func(UT_TYPE_AND_ARG(func, 0), UT_TYPE_AND_ARG(func, 1)) { \
         return mock_##func(UT_ARG(0), UT_ARG(1)); \
     }
 
 
-#define IMPL_MOCK_4(func, T0, T1, T2, T3)    \
+#define IMPL_MOCK_4(func)    \
     MOCK_STORAGE(func); \
     extern "C" FunctionTraits<decltype(&func)>::ReturnType \
     ut_##func(UT_TYPE_AND_ARG(func, 0), UT_TYPE_AND_ARG(func, 1), UT_TYPE_AND_ARG(func, 2), UT_TYPE_AND_ARG(func, 3)) { \
