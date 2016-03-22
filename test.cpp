@@ -1,5 +1,6 @@
+#include "mock.h"
 #include "MockScope.hpp"
-#include "prod.hpp"
+#include "prod.h"
 #include <iostream>
 #include <string>
 #include <stdexcept>

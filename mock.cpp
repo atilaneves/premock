@@ -1,5 +1,4 @@
-#include "mock.hpp"
-#undef send
+#include "mock.h"
 #include <functional>
 
 using namespace std;

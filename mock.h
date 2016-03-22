@@ -1,5 +1,9 @@
-#ifndef MOCK_HPP_
-#define MOCK_HPP_
+#ifndef MOCK_H_
+#define MOCK_H_
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <sys/socket.h>
 
@@ -9,4 +13,10 @@ ssize_t ut_send(int socket, const void *buffer, size_t length, int flags);
 #    define send ut_send
 #endif
 
-#endif // MOCK_HPP_
+
+#ifdef __cplusplus
+}
+#endif
+
+
+#endif // MOCK_H_
