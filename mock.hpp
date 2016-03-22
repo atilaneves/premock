@@ -50,6 +50,7 @@ struct FunctionTraits<R(*)(A...)> {
 #define MOCK_STORAGE(func) decltype(mock_##func) mock_##func = func
 
 #define UT_ARG(N) arg_##N
+#define UT_TYPE_AND_ARG(func, index) FunctionTraits<decltype(&func)>::Arg<index>::Type UT_ARG(index)
 
 
 #define IMPL_MOCK_0(func) \
@@ -60,13 +61,13 @@ struct FunctionTraits<R(*)(A...)> {
 
 #define IMPL_MOCK_1(func) \
     MOCK_STORAGE(func); \
-    extern "C" FunctionTraits<decltype(&func)>::ReturnType ut_##func(FunctionTraits<decltype(&func)>::Arg<0>::Type UT_ARG(0)) { \
+    extern "C" FunctionTraits<decltype(&func)>::ReturnType ut_##func(UT_TYPE_AND_ARG(func, 0)) { \
         return mock_##func(UT_ARG(0)); \
     }
 
 #define IMPL_MOCK_2(func, T0, T1) \
     MOCK_STORAGE(func); \
-    extern "C" FunctionTraits<decltype(&func)>::ReturnType ut_##func(T0 UT_ARG(0), T1 UT_ARG(1)) { \
+    extern "C" FunctionTraits<decltype(&func)>::ReturnType ut_##func(UT_TYPE_AND_ARG(func, 0), UT_TYPE_AND_ARG(func, 1)) { \
         return mock_##func(UT_ARG(0), UT_ARG(1)); \
     }
 
