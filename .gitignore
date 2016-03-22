@@ -1,2 +1,5 @@
 *.o
 test
+*.ninja
+.ninja_*
+__pycache__
