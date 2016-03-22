@@ -66,7 +66,7 @@ using ReturnType = typename ReturnTypeImpl<T>::Type;
 
 #define IMPL_MOCK_4(func, T1, T2, T3, T4) \
     MOCK_STORAGE(func); \
-    ReturnType<decltype(&func)> ut_##func(T1 a1, T2 a2, T3 a3, T4 a4) { \
+    extern "C" ReturnType<decltype(&func)> ut_##func(T1 a1, T2 a2, T3 a3, T4 a4) { \
         return mock_##func(a1, a2, a3, a4); \
     }
 
