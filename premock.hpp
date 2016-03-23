@@ -117,7 +117,11 @@ struct StdFunctionTraits<std::function<R(A...)>> {
     using TupleType = std::tuple<A...>;
 };
 
-#include <string>
+/**
+ A mock class to verify expectations of how the mock was called.
+ Supports verification of the number of times called, setting
+ return values and checking the values passed to it.
+ */
 template<typename T>
 class Mock {
 public:
@@ -125,16 +129,26 @@ public:
     using ReturnType = typename MockScope<T>::ReturnType;
     using TupleType = typename StdFunctionTraits<T>::TupleType;
 
+    /**
+     Enables checks on parameter values passed to function invocations
+     */
     class ParamChecker {
         public:
 
         ParamChecker(std::deque<TupleType> v):_values{v} {}
 
+        /**
+         Verifies the parameter values passed in the last invocation
+         */
         template<typename... A>
         void withValues(A... args) {
             withValues({std::make_tuple(args...)}, _values.size() - 1, _values.size());
         }
 
+        /**
+         Verifies the parameter values passed in all invocations since the last
+         call to `expectCalled`
+         */
         void withValues(std::initializer_list<TupleType> args,
                         size_t start = 0, size_t end = 0) {
             std::deque<TupleType> expected{args};
@@ -151,6 +165,10 @@ public:
         std::deque<TupleType> _values;
     };
 
+    /**
+     Constructor. Pass in the mock_ std::function to replace until
+     the end of scope.
+     */
     Mock(T& func):
         _mockScope{func,
             [this](auto... args) {
@@ -163,17 +181,29 @@ public:
 
     }
 
+    /**
+     Set the next return value
+     */
     void returnValue(ReturnType r) { _returns.push_back(r); }
 
+    /**
+     Set the next N return values
+     */
     template<typename A, typename... As>
     void returnValues(A arg, As... args) {
         _returns.push_back(arg);
         returnValues(args...);
     }
 
-    void returnValues() {
-    }
+    /**
+     Recursion terminator
+     */
+    void returnValues() {}
 
+    /**
+     Verify the mock was called n times. Returns a ParamChecker so that
+     assertions can be made on the passed in parameter values
+     */
     ParamChecker expectCalled(int n = 1) {
 
         if(_numCalls != n) throw std::logic_error("Was not called enough times");
@@ -190,11 +220,17 @@ private:
     std::deque<TupleType> _values;
 };
 
+/**
+ Helper function to create a Mock<T>
+ */
 template<typename T>
 Mock<T> mock(T& func) {
     return {func};
 }
 
+/**
+ Helper macro to mock a particular "real" function
+ */
 #define MOCK(func) mock(mock_##func)
 
 /**
