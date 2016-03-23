@@ -55,12 +55,20 @@ int main() {
         auto m = MOCK(two_func);
         m.returnValues(11, 22, 33);
         assertEqual(prod_two(99, 999), 11);
-        assertEqual(prod_two(99, 999), 22);
+        assertEqual(prod_two(9, 10), 22);
         assertEqual(prod_two(5, 5), 33);
         m.expectCalled(3).withValues(4, 6);
     }
 
+    {
+        auto m = MOCK(two_func);
+        m.returnValues(11, 22, 33);
+        assertEqual(prod_two(99, 999), 11);
+        assertEqual(prod_two(9, 10), 22);
+        assertEqual(prod_two(5, 5), 33);
+        m.expectCalled(3).withValues({make_tuple(98, 1000), make_tuple(8, 11), make_tuple(4, 6)});
 
+    }
 
     cout << "Ok" << endl;
 }

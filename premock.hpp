@@ -74,9 +74,8 @@ public:
         _func{func},
         _oldFunc{std::move(func)} {
 
-            _func = std::move(scopeFunc);
-
-        }
+        _func = std::move(scopeFunc);
+    }
 
 
     ~MockScope() {
@@ -110,40 +109,54 @@ MockScope<T> mockScope(T& func, F scopeFunc) {
 template<typename>
 struct StdFunctionTraits {};
 
+/**
+ Pattern match on std::function to get its parameter types
+ */
 template<typename R, typename... A>
 struct StdFunctionTraits<std::function<R(A...)>> {
     using TupleType = std::tuple<A...>;
-    enum { TupleSize = sizeof...(A) };
 };
 
+#include <string>
 template<typename T>
 class Mock {
-private:
+public:
 
-    MockScope<T> _mockScope;
     using ReturnType = typename MockScope<T>::ReturnType;
-    std::deque<ReturnType> _returns;
-    int _numCalls{};
     using TupleType = typename StdFunctionTraits<T>::TupleType;
-    TupleType _values;
 
     struct ParamChecker {
-        ParamChecker(TupleType v):values{v} {}
+
+        ParamChecker(std::deque<TupleType> v):values{v} {}
 
         template<typename... A>
         void withValues(A... args) {
             auto expected = std::make_tuple(args...);
-            if(expected != values) throw std::logic_error("Called values do not match");
+            auto actual = *--values.end();
+            if(expected != actual)
+                throw std::logic_error(std::string{"Called values do not match"} +
+                                       "\nExp: " + std::to_string(std::get<0>(expected)) +
+                                       "\nAct: " + std::to_string(std::get<0>(actual)));
         }
-        typename StdFunctionTraits<T>::TupleType values;
-    };
 
-public:
+        void withValues(std::initializer_list<TupleType> args) {
+            std::deque<TupleType> expected{args};
+            if(expected.size() != args.size()) throw std::logic_error("Wrong size in withValues");
+            for(size_t i = 0; i < expected.size(); ++i) {
+                if(expected[i] != values[i])
+                    throw std::logic_error(std::string("Called values do not match: ") +
+                                           "\nExp: " + std::to_string(std::get<0>(expected[i])) +
+                                           "\nAct: " + std::to_string(std::get<0>(values[i])));
+            }
+        }
+
+        std::deque<TupleType> values;
+    };
 
     Mock(T& func):
         _mockScope{func,
             [this](auto... args) {
-                _values = std::make_tuple(args...);
+                _values.emplace_back(args...);
                 ++_numCalls;
                 auto ret = _returns[0];
                 _returns.pop_front();
@@ -171,6 +184,12 @@ public:
         return {_values};
     }
 
+private:
+
+    MockScope<T> _mockScope;
+    std::deque<ReturnType> _returns;
+    int _numCalls{};
+    std::deque<TupleType> _values;
 };
 
 template<typename T>
