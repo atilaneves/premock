@@ -2,7 +2,7 @@
 #define MOCK_OTHER_HPP_
 
 
-#include "mock.hpp"
+#include "premock.hpp"
 #include "mock_other.h"
 
 DECL_MOCK(zero_func);

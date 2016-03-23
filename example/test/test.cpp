@@ -11,7 +11,9 @@ using namespace std;
 
 template<typename A, typename E>
 static void assertEqual(A&& actual, E&& expected) {
-    if(actual != expected) throw runtime_error("\nExpected: " + to_string(expected) + "\n" + "Actual:   " + to_string(actual));
+    if(actual != expected)
+        throw runtime_error("\nExpected: " + to_string(expected) +
+                            "\nActual:   " + to_string(actual));
 }
 
 int main() {
@@ -32,7 +34,9 @@ int main() {
         assertEqual(prod_two(3, 4), 8);
     }
     {
-        REPLACE(three_func, [](double, int j, const char*){ if(j == 2) throw runtime_error("oh noes"); });
+        REPLACE(three_func, [](double, int j, const char*){
+            if(j == 2) throw runtime_error("oh noes");
+        });
         prod_three(0, 1, nullptr);
         try {
             prod_three(0, 0, nullptr); //should throw

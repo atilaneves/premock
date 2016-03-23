@@ -33,7 +33,7 @@
  following contents:
 
  #include "mock_network.h" // the header mentioned above where send -> ut_send
- #include "mock.hpp"
+ #include "premock.hpp"
  DECL_MOCK(send); // the declaration for the implementation in the cpp file
 
 

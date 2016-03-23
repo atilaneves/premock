@@ -1,7 +1,7 @@
 #ifndef MOCK_NETWORK_HPP_
 #define MOCK_NETWORK_HPP_
 
-#include "mock.hpp"
+#include "premock.hpp"
 #include "mock_network.h"
 
 DECL_MOCK(send);
