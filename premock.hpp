@@ -157,7 +157,7 @@ public:
                 _values.emplace_back(args...);
                 ++_numCalls;
                 auto ret = _returns[0];
-                _returns.pop_front();
+                if(_returns.size()) _returns.pop_front();
                 return ret;
         }} {
 
