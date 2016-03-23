@@ -22,6 +22,6 @@ int prod_two(int i, int j) {
     return two_func(i - 1, j + 1);
 }
 
-void prod_three(int i, int j, int k) {
-    three_func(i + 1, j + 2, k + 3);
+void prod_three(double i, int j, const char* k) {
+    three_func(i + 1, j + 2, k);
 }

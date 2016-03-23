@@ -14,7 +14,7 @@ int two_func(int i, int j) {
 }
 
 
-void three_func(int i, int j, int k) {
+void three_func(double i, int j, const char* k) {
     (void)i;
     (void)j;
     (void)k;

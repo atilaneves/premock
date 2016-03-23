@@ -9,7 +9,7 @@ int prod_send(int fd);
 int prod_zero();
 int prod_one(int i);
 int prod_two(int i, int j);
-void prod_three(int i, int j, int k);
+void prod_three(double i, int j, const char* k);
 
 #ifdef __cplusplus
 }

@@ -32,10 +32,10 @@ int main() {
         assertEqual(prod_two(3, 4), 8);
     }
     {
-        auto _ = MOCK(three_func, [](int, int j, int){ if(j == 2) throw runtime_error("oh noes"); });
-        prod_three(0, 1, 0);
+        auto _ = MOCK(three_func, [](double, int j, const char*){ if(j == 2) throw runtime_error("oh noes"); });
+        prod_three(0, 1, nullptr);
         try {
-            prod_three(0, 0, 0); //should throw
+            prod_three(0, 0, nullptr); //should throw
             throw logic_error("oops"); //should never get here
         } catch(const runtime_error&) { }
     }
