@@ -43,7 +43,7 @@
 
 
  #include "mock_network.hpp"
- auto _ = MOCK(send, [](auto...) { return 7; });
+ auto _ = REPLACE(send, [](auto...) { return 7; });
  // any function that calls send from here until the end of scope
  // will call our lambda instead and always return 7
 
@@ -96,11 +96,11 @@ MockScope<T> mockScope(T& func, F scopeFunc) {
 /**
  Temporarily replace func with the passed-in lambda:
  e.g.
- auto mock = MOCK(send, [](auto...) { return -1; })
+ auto mock = REPLACE(send, [](auto...) { return -1; })
  This causes every call to `send` in the production code to
  return -1 no matter what
  */
-#define MOCK(func, lambda) mockScope(mock_##func, lambda)
+#define REPLACE(func, lambda) mockScope(mock_##func, lambda)
 
 
 /**
