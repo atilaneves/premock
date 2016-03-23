@@ -12,3 +12,10 @@ int one_func(int i) {
 int two_func(int i, int j) {
     return i * j;
 }
+
+
+void three_func(int i, int j, int k) {
+    (void)i;
+    (void)j;
+    (void)k;
+}

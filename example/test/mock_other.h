@@ -10,6 +10,7 @@ extern "C" {
 #    define zero_func ut_zero_func
 #    define one_func ut_one_func
 #    define two_func ut_two_func
+#    define three_func ut_three_func
 #endif
 
 #include "other.h"

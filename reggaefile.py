@@ -2,7 +2,7 @@ from reggae import *
 
 
 includes = [".", "example/test", "example/src", "example/deps"]
-common_flags = '-Wall -Werror -g'
+common_flags = '-Wall -Werror -Wextra -g'
 c_flags = common_flags
 cpp_flags = common_flags + ' -std=c++14'
 prod_objs = object_files(src_dirs=["example/src"],

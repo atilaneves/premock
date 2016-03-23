@@ -31,6 +31,14 @@ int main() {
         auto _ = MOCK(two_func, [](int i, int j) { return i + j + 1; });
         assertEqual(prod_two(3, 4), 8);
     }
+    {
+        auto _ = MOCK(three_func, [](int, int j, int){ if(j == 2) throw runtime_error("oh noes"); });
+        prod_three(0, 1, 0);
+        try {
+            prod_three(0, 0, 0); //should throw
+            throw logic_error("oops");
+        } catch(const runtime_error&) { }
+    }
 
     cout << "Ok" << endl;
 }
