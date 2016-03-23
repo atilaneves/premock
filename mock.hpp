@@ -110,9 +110,8 @@ template<typename T>
 class Mock {
 private:
 
-    T& _func;
-    T _oldFunc;
-    using ReturnType = typename T::result_type;
+    MockScope<T> _mockScope;
+    using ReturnType = typename MockScope<T>::ReturnType;
     std::deque<ReturnType> _returns;
     int _numCalls{};
 
@@ -124,17 +123,16 @@ private:
 
 public:
 
+    Mock(T& func):
+        _mockScope{func,
+            [this](auto...) {
+                ++_numCalls;
+                auto ret = _returns[0];
+                _returns.pop_front();
+                return ret;
+        }} {
 
-    Mock(T& func):_func{func}, _oldFunc{func} {
-        _func = [this](auto...) {
-            ++_numCalls;
-            auto ret = _returns[0];
-            _returns.pop_front();
-            return ret;
-        };
     }
-
-    ~Mock() { _func = _oldFunc; }
 
     void returnValue(ReturnType r) { _returns.push_back(r); }
 
@@ -146,7 +144,6 @@ public:
 
     void returnValues() {
     }
-
 
     ParamChecker expectCalled(int n = 1) {
 
