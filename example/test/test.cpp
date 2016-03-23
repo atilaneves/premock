@@ -31,4 +31,6 @@ int main() {
         auto _ = MOCK(two_func, [](int i, int j) { return i + j + 1; });
         assertEqual(prod_two(3, 4), 8);
     }
+
+    cout << "Ok" << endl;
 }

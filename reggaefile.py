@@ -1,16 +1,17 @@
 from reggae import *
 
 
+includes = [".", "example/test", "example/src", "example/deps"]
 common_flags = '-Wall -Werror -g'
 c_flags = common_flags
 cpp_flags = common_flags + ' -std=c++14'
-prod_objs = object_files(src_files=["prod.c"],
+prod_objs = object_files(src_dirs=["example/src"],
+                         includes=includes,
                          flags=c_flags + ' -include mocks.h')
-test_objs = object_files(src_files=["mock_network.cpp",
-                                    "mock_other.cpp",
-                                    "test.cpp"],
+test_objs = object_files(src_dirs=["example/test"],
+                         includes=includes,
                          flags=cpp_flags + ' -DDISABLE_MOCKS')
-dep_objs = object_files(src_files=["other.c"],
+dep_objs = object_files(src_dirs=["example/deps"],
                         flags=c_flags + ' -DDISABLE_MOCKS')
-test = link(exe_name="test", dependencies=[test_objs, prod_objs, dep_objs])
+test = link(exe_name="test_example", dependencies=[test_objs, prod_objs, dep_objs])
 build = Build(test)

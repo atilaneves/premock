@@ -1,5 +1,5 @@
 *.o
-test
+test_example
 *.ninja
 .ninja_*
 __pycache__
