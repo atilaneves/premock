@@ -125,32 +125,30 @@ public:
     using ReturnType = typename MockScope<T>::ReturnType;
     using TupleType = typename StdFunctionTraits<T>::TupleType;
 
-    struct ParamChecker {
+    class ParamChecker {
+        public:
 
-        ParamChecker(std::deque<TupleType> v):values{v} {}
+        ParamChecker(std::deque<TupleType> v):_values{v} {}
 
         template<typename... A>
         void withValues(A... args) {
-            auto expected = std::make_tuple(args...);
-            auto actual = *--values.end();
-            if(expected != actual)
-                throw std::logic_error(std::string{"Called values do not match"} +
-                                       "\nExp: " + std::to_string(std::get<0>(expected)) +
-                                       "\nAct: " + std::to_string(std::get<0>(actual)));
+            withValues({std::make_tuple(args...)}, _values.size() - 1, _values.size());
         }
 
-        void withValues(std::initializer_list<TupleType> args) {
+        void withValues(std::initializer_list<TupleType> args,
+                        size_t start = 0, size_t end = 0) {
             std::deque<TupleType> expected{args};
             if(expected.size() != args.size()) throw std::logic_error("Wrong size in withValues");
-            for(size_t i = 0; i < expected.size(); ++i) {
-                if(expected[i] != values[i])
-                    throw std::logic_error(std::string("Called values do not match: ") +
-                                           "\nExp: " + std::to_string(std::get<0>(expected[i])) +
-                                           "\nAct: " + std::to_string(std::get<0>(values[i])));
+            if(end == 0) end = expected.size();
+            for(size_t i = start; i < end; ++i) {
+                if(expected[i] != _values[i])
+                    throw std::logic_error("Called values do not match");
             }
         }
 
-        std::deque<TupleType> values;
+        private:
+
+        std::deque<TupleType> _values;
     };
 
     Mock(T& func):

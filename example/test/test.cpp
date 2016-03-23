@@ -67,7 +67,6 @@ int main() {
         assertEqual(prod_two(9, 10), 22);
         assertEqual(prod_two(5, 5), 33);
         m.expectCalled(3).withValues({make_tuple(98, 1000), make_tuple(8, 11), make_tuple(4, 6)});
-
     }
 
     cout << "Ok" << endl;
