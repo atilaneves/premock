@@ -1,3 +1,54 @@
+/**
+ This header makes it possible to replace implementations of C functions with C++
+ callables for unit testing.
+
+ It works by using the preprocessor to redefine the functions to be mocked in
+ the files to be tested by prepending "ut_" to them instead of calling the "real"
+ implementation. This "ut_" function then forwards to a std::function of the
+ appropriate type that can be changed in runtime to a C++ callable.
+
+ An example of mocking the BSD socket API "send" function would be to have
+ a header like this:
+
+
+ #ifndef DISABLE_MOCKS
+ #    define send ut_send
+ #endif
+ #include <sys/socket.h>
+
+
+ Which the build system would insert before any other #includes via an option
+ to the compiler (-include for gcc/clang)
+
+ Now all calls to "send" are actually to "ut_send". This will fail to link since
+ "ut_send" doesn't exist. To implement it, the test binary should be linked with
+ an object file from compiling this code (mock_network.cpp):
+
+
+ #include "mock_network.hpp"
+ IMPL_MOCK(4, send) // the 4 is the number of parameters send takes
+
+
+ This will only compile if a header called "mock_network.hpp" exists with the
+ following contents:
+
+ #include "mock_network.h" // the header mentioned above where send -> ut_send
+ #include "mock.hpp"
+ DECL_MOCK(send); // the declaration for the implementation in the cpp file
+
+
+ In this example, the build system should pass -DDISABLE_MOCKS when compiling
+ mock_network.cpp so that it has access to the "real" send. Now test code can do
+ this:
+
+
+ #include "mock_network.hpp"
+ auto _ = MOCK(send, [](auto...) { return 7; });
+ // any function that calls send from here until the end of scope
+ // will call our lambda instead and always return 7
+
+ */
+
 #ifndef MOCK_HPP_
 #define MOCK_HPP_
 
@@ -52,15 +103,27 @@ MockScope<T> mockScope(T& func, F scopeFunc) {
 #define MOCK(func, lambda) mockScope(mock_##func, lambda)
 
 
+/**
+ Traits class for functions
+ */
 template<typename F>
 struct FunctionTraits;
 
 template<typename R, typename... A>
 struct FunctionTraits<R(*)(A...)> {
+    /**
+     The corresponding type of a std::function that the function could be assigned to
+     */
     using StdFunctionType = std::function<R(A...)>;
-    using ReturnType = R;
-    enum { Arity = sizeof...(A) };
 
+    /**
+     The return type of the function
+     */
+    using ReturnType = R;
+
+    /**
+     Helper struct to get the type of the Nth argument to the function
+     */
     template<int N>
     struct Arg {
         using Type = std::remove_reference_t<decltype(std::get<N>(std::tuple<A...>()))>;
@@ -69,18 +132,25 @@ struct FunctionTraits<R(*)(A...)> {
 
 
 /**
- Declares a mock function. The parameters are the function name and
- the types of its parameters. This is simply the declaration, the
- implementation is done with IMPL_MOCK. e.g.
+ Declares a mock function for "real" function func. This is simply the
+ declaration, the implementation is done with IMPL_MOCK. If foo has signature:
+
  int foo(int, float);
+
+ Then DECL_MOCK(foo) is:
+
  extern std::function<int(int, float)> mock_foo;
  */
 #define DECL_MOCK(func) extern FunctionTraits<decltype(&func)>::StdFunctionType mock_##func
 
 /**
  Definition of the std::function that will store the implementation.
- Defaults to the "real" function. e.g.
+ Defaults to the "real" function. e.g. given:
+
  int foo(int, float);
+
+ Then MOCK_STORAGE(foo) is:
+
  std::function<int(int, float)> mock_foo = foo;
  */
 #define MOCK_STORAGE(func) decltype(mock_##func) mock_##func = func
