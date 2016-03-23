@@ -1,7 +1,7 @@
 #ifndef MOCK_NETWORK_H_
 #define MOCK_NETWORK_H_
 
-#ifndef DISABLE_MOCKS
+#ifdef PREMOCK_ENABLE
 #    define send ut_send
 #endif
 

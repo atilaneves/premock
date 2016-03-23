@@ -11,7 +11,7 @@
  a header like this:
 
 
- #ifndef DISABLE_MOCKS
+ #ifdef PREMOCK_ENABLE
  #    define send ut_send
  #endif
  #include <sys/socket.h>
