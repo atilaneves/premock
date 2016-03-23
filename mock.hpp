@@ -103,7 +103,7 @@ MockScope<T> mockScope(T& func, F scopeFunc) {
  This causes every call to `send` in the production code to
  return -1 no matter what
  */
-#define REPLACE(func, lambda) mockScope(mock_##func, lambda)
+#define REPLACE(func, lambda) auto _ = mockScope(mock_##func, lambda)
 
 
 template<typename T>

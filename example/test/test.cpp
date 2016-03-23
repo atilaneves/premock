@@ -16,23 +16,23 @@ static void assertEqual(A&& actual, E&& expected) {
 
 int main() {
     {
-        auto _ = REPLACE(send, [](auto...) { return 7; });
+        REPLACE(send, [](auto...) { return 7; });
         assertEqual(prod_send(0), 7);
     }
     {
-        auto _ = REPLACE(zero_func, []() { return 3; });
+        REPLACE(zero_func, []() { return 3; });
         assertEqual(prod_zero(), 3);
     }
     {
-        auto _ = REPLACE(one_func, [](int i) { return 4 * i; });
+        REPLACE(one_func, [](int i) { return 4 * i; });
         assertEqual(prod_one(8), 36);
     }
     {
-        auto _ = REPLACE(two_func, [](int i, int j) { return i + j + 1; });
+        REPLACE(two_func, [](int i, int j) { return i + j + 1; });
         assertEqual(prod_two(3, 4), 8);
     }
     {
-        auto _ = REPLACE(three_func, [](double, int j, const char*){ if(j == 2) throw runtime_error("oh noes"); });
+        REPLACE(three_func, [](double, int j, const char*){ if(j == 2) throw runtime_error("oh noes"); });
         prod_three(0, 1, nullptr);
         try {
             prod_three(0, 0, nullptr); //should throw
@@ -49,7 +49,7 @@ int main() {
 
     {
         auto m = MOCK(two_func);
-        m.returnValues(11, 22, 33); //prod_two should call mock_two_func and return 5 no matter what
+        m.returnValues(11, 22, 33);
         assertEqual(prod_two(99, 999), 11);
         assertEqual(prod_two(99, 999), 22);
         assertEqual(prod_two(99, 999), 33);
