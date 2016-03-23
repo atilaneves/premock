@@ -20,6 +20,7 @@ int prod_one(int i) {
 }
 
 int prod_two(int i, int j) {
+    one_func(j + 2);
     return two_func(i - 1, j + 1);
 }
 

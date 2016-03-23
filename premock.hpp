@@ -177,28 +177,41 @@ public:
                 auto ret = _returns[0];
                 if(_returns.size()) _returns.pop_front();
                 return ret;
-        }} {
+        }},
+    _returns(1) {
 
     }
 
     /**
      Set the next return value
      */
-    void returnValue(ReturnType r) { _returns.push_back(r); }
+    void returnValue(ReturnType r) {
+        _returns.clear();
+        _returns.emplace_back(r);
+    }
+
+    /**
+     Set the next N return values
+     */
+    template<typename... As>
+    void returnValues(As... args) {
+        _returns.clear();
+        returnValuesImpl(args...);
+    }
 
     /**
      Set the next N return values
      */
     template<typename A, typename... As>
-    void returnValues(A arg, As... args) {
+    void returnValuesImpl(A arg, As... args) {
         _returns.push_back(arg);
-        returnValues(args...);
+        returnValuesImpl(args...);
     }
 
     /**
      Recursion terminator
      */
-    void returnValues() {}
+    void returnValuesImpl() {}
 
     /**
      Verify the mock was called n times. Returns a ParamChecker so that

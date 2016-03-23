@@ -74,5 +74,16 @@ int main() {
         m.expectCalled(3).withValues({make_tuple(98, 1000), make_tuple(8, 11), make_tuple(4, 6)});
     }
 
+    {
+        auto mock1 = MOCK(one_func);
+        auto mock2 = MOCK(two_func);
+        mock2.returnValues(11, 22, 33);
+        assertEqual(prod_two(99, 999), 11);
+        assertEqual(prod_two(9, 10), 22);
+        assertEqual(prod_two(5, 5), 33);
+        mock2.expectCalled(3).withValues({make_tuple(98, 1000), make_tuple(8, 11), make_tuple(4, 6)});
+    }
+
+
     cout << "Ok" << endl;
 }
