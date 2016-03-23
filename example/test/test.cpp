@@ -21,6 +21,12 @@ int main() {
         REPLACE(send, [](auto...) { return 7; });
         assertEqual(prod_send(0), 7);
     }
+
+    // out of scope, send reverts to the "real" implementation
+    // which will return -1 since 0 isn't a valid socket file
+    // descriptor
+    assertEqual(prod_send(0), -1);
+
     {
         auto m = MOCK(send);
         prod_send(3);
