@@ -65,14 +65,17 @@ template<typename T>
 class MockScope {
 public:
 
+    using ReturnType = typename T::result_type;
+
     template<typename F>
     MockScope(T& func, F scopeFunc):
         _func{func},
         _oldFunc{std::move(func)} {
 
-        _func = std::move(scopeFunc);
+            _func = std::move(scopeFunc);
 
-    }
+        }
+
 
     ~MockScope() {
         _func = std::move(_oldFunc);
@@ -102,6 +105,37 @@ MockScope<T> mockScope(T& func, F scopeFunc) {
  */
 #define REPLACE(func, lambda) mockScope(mock_##func, lambda)
 
+
+template<typename T>
+class Mock {
+private:
+
+    T& _func;
+    T _oldFunc;
+    using ReturnType = typename T::result_type;
+    ReturnType _return{};
+
+public:
+
+
+    Mock(T& func):_func{func}, _oldFunc{func} {
+        _func = [this](auto...) {
+            return _return;
+        };
+    }
+
+    ~Mock() { _func = _oldFunc; }
+
+    void returnValue(ReturnType r) { _return = r; }
+
+};
+
+template<typename T>
+Mock<T> mock(T& func) {
+    return {func};
+}
+
+#define MOCK(func) mock(mock_##func)
 
 /**
  Traits class for functions

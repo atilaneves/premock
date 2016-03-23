@@ -11,7 +11,7 @@ using namespace std;
 
 template<typename A, typename E>
 static void assertEqual(A&& actual, E&& expected) {
-    if(actual != expected) throw runtime_error("Expected: " + to_string(expected) + "\n" + "Actual: " + to_string(actual));
+    if(actual != expected) throw runtime_error("\nExpected: " + to_string(expected) + "\n" + "Actual:   " + to_string(actual));
 }
 
 int main() {
@@ -38,6 +38,12 @@ int main() {
             prod_three(0, 0, nullptr); //should throw
             throw logic_error("oops"); //should never get here
         } catch(const runtime_error&) { }
+    }
+
+    {
+        auto m = MOCK(two_func);
+        m.returnValue(5); //prod_two should call mock_two_func and return 5 no matter what
+        assertEqual(prod_two(99, 999), 5);
     }
 
     cout << "Ok" << endl;
