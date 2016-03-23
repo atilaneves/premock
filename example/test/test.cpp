@@ -22,6 +22,11 @@ int main() {
         assertEqual(prod_send(0), 7);
     }
     {
+        auto m = MOCK(send);
+        prod_send(3);
+        m.expectCalled().withValues(3, nullptr, 0, 0);
+    }
+    {
         REPLACE(zero_func, []() { return 3; });
         assertEqual(prod_zero(), 3);
     }
