@@ -56,7 +56,7 @@
 #include <functional>
 #include <type_traits>
 #include <tuple>
-
+#include <deque>
 
 /**
  RAII class for setting a mock to a callable until the end of scope
@@ -113,20 +113,48 @@ private:
     T& _func;
     T _oldFunc;
     using ReturnType = typename T::result_type;
-    ReturnType _return{};
+    std::deque<ReturnType> _returns;
+    int _numCalls{};
+
+    struct ParamChecker {
+        template<typename... A>
+        void withValues(A...) {
+        }
+    };
 
 public:
 
 
     Mock(T& func):_func{func}, _oldFunc{func} {
         _func = [this](auto...) {
-            return _return;
+            ++_numCalls;
+            auto ret = _returns[0];
+            _returns.pop_front();
+            return ret;
         };
     }
 
     ~Mock() { _func = _oldFunc; }
 
-    void returnValue(ReturnType r) { _return = r; }
+    void returnValue(ReturnType r) { _returns.push_back(r); }
+
+    template<typename A, typename... As>
+    void returnValues(A arg, As... args) {
+        _returns.push_back(arg);
+        returnValues(args...);
+    }
+
+    void returnValues() {
+    }
+
+
+    ParamChecker expectCalled(int n = 1) {
+
+        if(_numCalls != n) throw "call fail";
+        _numCalls = 0;
+
+        return {};
+    }
 
 };
 

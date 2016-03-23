@@ -44,7 +44,18 @@ int main() {
         auto m = MOCK(two_func);
         m.returnValue(5); //prod_two should call mock_two_func and return 5 no matter what
         assertEqual(prod_two(99, 999), 5);
+        m.expectCalled(1);
     }
+
+    {
+        auto m = MOCK(two_func);
+        m.returnValues(11, 22, 33); //prod_two should call mock_two_func and return 5 no matter what
+        assertEqual(prod_two(99, 999), 11);
+        assertEqual(prod_two(99, 999), 22);
+        assertEqual(prod_two(99, 999), 33);
+        m.expectCalled(3);
+    }
+
 
     cout << "Ok" << endl;
 }
