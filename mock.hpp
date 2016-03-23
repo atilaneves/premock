@@ -2,10 +2,54 @@
 #define MOCK_HPP_
 
 
-#include "MockScope.hpp"
 #include <functional>
 #include <type_traits>
 #include <tuple>
+
+
+/**
+ RAII class for setting a mock to a callable until the end of scope
+ */
+template<typename T>
+class MockScope {
+public:
+
+    template<typename F>
+    MockScope(T& func, F scopeFunc):
+        _func{func},
+        _oldFunc{std::move(func)} {
+
+        _func = std::move(scopeFunc);
+
+    }
+
+    ~MockScope() {
+        _func = std::move(_oldFunc);
+    }
+
+private:
+
+    T& _func;
+    T _oldFunc;
+};
+
+
+/**
+ Helper function to create a MockScope
+*/
+template<typename T, typename F>
+MockScope<T> mockScope(T& func, F scopeFunc) {
+    return {func, scopeFunc};
+}
+
+/**
+ Temporarily replace func with the passed-in lambda:
+ e.g.
+ auto mock = MOCK(send, [](auto...) { return -1; })
+ This causes every call to `send` in the production code to
+ return -1 no matter what
+ */
+#define MOCK(func, lambda) mockScope(mock_##func, lambda)
 
 
 template<typename F>
@@ -23,15 +67,6 @@ struct FunctionTraits<R(*)(A...)> {
     };
 };
 
-
-/**
- Temporarily replace func with the passed-in lambda:
- e.g.
- auto mock = MOCK(send, [](auto...) { return -1; })
- This causes every call to `send` in the production code to
- return -1 no matter what
- */
-#define MOCK(func, lambda) mockScope(mock_##func, lambda)
 
 /**
  Declares a mock function. The parameters are the function name and

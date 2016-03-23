@@ -36,7 +36,7 @@ int main() {
         prod_three(0, 1, 0);
         try {
             prod_three(0, 0, 0); //should throw
-            throw logic_error("oops");
+            throw logic_error("oops"); //should never get here
         } catch(const runtime_error&) { }
     }
 
