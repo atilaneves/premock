@@ -57,6 +57,8 @@
 #include <type_traits>
 #include <tuple>
 #include <deque>
+#include <stdexcept>
+
 
 /**
  RAII class for setting a mock to a callable until the end of scope
@@ -105,6 +107,14 @@ MockScope<T> mockScope(T& func, F scopeFunc) {
  */
 #define REPLACE(func, lambda) auto _ = mockScope(mock_##func, lambda)
 
+template<typename>
+struct StdFunctionTraits {};
+
+template<typename R, typename... A>
+struct StdFunctionTraits<std::function<R(A...)>> {
+    using TupleType = std::tuple<A...>;
+    enum { TupleSize = sizeof...(A) };
+};
 
 template<typename T>
 class Mock {
@@ -114,18 +124,26 @@ private:
     using ReturnType = typename MockScope<T>::ReturnType;
     std::deque<ReturnType> _returns;
     int _numCalls{};
+    using TupleType = typename StdFunctionTraits<T>::TupleType;
+    TupleType _values;
 
     struct ParamChecker {
+        ParamChecker(TupleType v):values{v} {}
+
         template<typename... A>
-        void withValues(A...) {
+        void withValues(A... args) {
+            auto expected = std::make_tuple(args...);
+            if(expected != values) throw std::logic_error("Called values do not match");
         }
+        typename StdFunctionTraits<T>::TupleType values;
     };
 
 public:
 
     Mock(T& func):
         _mockScope{func,
-            [this](auto...) {
+            [this](auto... args) {
+                _values = std::make_tuple(args...);
                 ++_numCalls;
                 auto ret = _returns[0];
                 _returns.pop_front();
@@ -147,10 +165,10 @@ public:
 
     ParamChecker expectCalled(int n = 1) {
 
-        if(_numCalls != n) throw "call fail";
+        if(_numCalls != n) throw std::logic_error("Was not called enough times");
         _numCalls = 0;
 
-        return {};
+        return {_values};
     }
 
 };
@@ -165,7 +183,7 @@ Mock<T> mock(T& func) {
 /**
  Traits class for functions
  */
-template<typename F>
+template<typename>
 struct FunctionTraits;
 
 template<typename R, typename... A>
