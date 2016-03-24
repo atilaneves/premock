@@ -5,10 +5,10 @@
 extern "C" {
 #endif
 
-int zero_func();
-int one_func(int);
-int two_func(int, int);
-void three_func(double, int, const char*);
+int other_zero();
+int other_one(int);
+int other_two(int, int);
+void other_three(double, int, const char*);
 
 #ifdef __cplusplus
 }

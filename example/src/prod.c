@@ -1,3 +1,9 @@
+/**
+ This file is an example of production code to be tested,
+ calling dependencies such as send or the included
+ "other" module. 
+ */
+
 #include "other.h"
 #include <sys/socket.h>
 #include <stddef.h>
@@ -12,18 +18,18 @@ int prod_send(int fd) {
 
 
 int prod_zero() {
-    return zero_func();
+    return other_zero();
 }
 
 int prod_one(int i) {
-    return one_func(i + 1);
+    return other_one(i + 1);
 }
 
 int prod_two(int i, int j) {
-    one_func(j + 2);
-    return two_func(i - 1, j + 1);
+    other_one(j + 2);
+    return other_two(i - 1, j + 1);
 }
 
 void prod_three(double i, int j, const char* k) {
-    three_func(i + 1, j + 2, k);
+    other_three(i + 1, j + 2, k);
 }

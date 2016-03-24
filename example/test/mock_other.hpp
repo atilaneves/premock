@@ -5,9 +5,9 @@
 #include "premock.hpp"
 #include "mock_other.h"
 
-DECL_MOCK(zero_func);
-DECL_MOCK(one_func);
-DECL_MOCK(two_func);
-DECL_MOCK(three_func);
+DECL_MOCK(other_zero);
+DECL_MOCK(other_one);
+DECL_MOCK(other_two);
+DECL_MOCK(other_three);
 
 #endif // MOCK_OTHER_HPP_

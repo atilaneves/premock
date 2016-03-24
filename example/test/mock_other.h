@@ -2,10 +2,10 @@
 #define MOCK_OTHER_H_
 
 #ifdef PREMOCK_ENABLE
-#    define zero_func ut_zero_func
-#    define one_func ut_one_func
-#    define two_func ut_two_func
-#    define three_func ut_three_func
+#    define other_zero ut_other_zero
+#    define other_one ut_other_one
+#    define other_two ut_other_two
+#    define other_three ut_other_three
 #endif
 
 #include "other.h"

@@ -33,19 +33,19 @@ int main() {
         m.expectCalled().withValues(3, nullptr, 0, 0);
     }
     {
-        REPLACE(zero_func, []() { return 3; });
+        REPLACE(other_zero, []() { return 3; });
         assertEqual(prod_zero(), 3);
     }
     {
-        REPLACE(one_func, [](int i) { return 4 * i; });
+        REPLACE(other_one, [](int i) { return 4 * i; });
         assertEqual(prod_one(8), 36);
     }
     {
-        REPLACE(two_func, [](int i, int j) { return i + j + 1; });
+        REPLACE(other_two, [](int i, int j) { return i + j + 1; });
         assertEqual(prod_two(3, 4), 8);
     }
     {
-        REPLACE(three_func, [](double, int j, const char*){
+        REPLACE(other_three, [](double, int j, const char*){
             if(j == 2) throw runtime_error("oh noes");
         });
         prod_three(0, 1, nullptr);
@@ -56,14 +56,14 @@ int main() {
     }
 
     {
-        auto m = MOCK(two_func);
-        m.returnValue(5); //prod_two should call mock_two_func and return 5 no matter what
+        auto m = MOCK(other_two);
+        m.returnValue(5); //prod_two should call mock_other_two and return 5 no matter what
         assertEqual(prod_two(99, 999), 5);
         m.expectCalled().withValues(98, 1000);
     }
 
     {
-        auto m = MOCK(two_func);
+        auto m = MOCK(other_two);
         m.returnValue(11, 22, 33);
         assertEqual(prod_two(99, 999), 11);
         assertEqual(prod_two(9, 10), 22);
@@ -72,7 +72,7 @@ int main() {
     }
 
     {
-        auto m = MOCK(two_func);
+        auto m = MOCK(other_two);
         m.returnValue(11, 22, 33);
         assertEqual(prod_two(99, 999), 11);
         assertEqual(prod_two(9, 10), 22);
@@ -81,8 +81,8 @@ int main() {
     }
 
     {
-        auto mock1 = MOCK(one_func);
-        auto mock2 = MOCK(two_func);
+        auto mock1 = MOCK(other_one);
+        auto mock2 = MOCK(other_two);
         mock2.returnValue(11, 22, 33);
         assertEqual(prod_two(99, 999), 11);
         assertEqual(prod_two(9, 10), 22);
