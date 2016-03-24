@@ -28,7 +28,7 @@
 
 
  #include "mock_network.hpp"
- IMPL_MOCK(4, send) // the 4 is the number of parameters send takes
+ IMPL_MOCK(4, send); // the 4 is the number of parameters send takes
 
 
  This will only compile if a header called "mock_network.hpp" exists with the
@@ -318,17 +318,28 @@ struct FunctionTraits<R(*)(A...)> {
 #define UT_FUNC_ARG(index) arg_##index
 
 /**
- Type and name for ut_ function argument at position index
+ Type and name for ut_ function argument at position index. If foo has signature:
+
+ int foo(int, float);
+
+ Then:
+
+ UT_FUNC_TYPE_AND_ARG(foo, 0) = int arg_0
+ UT_FUNC_TYPE_AND_ARG(foo, 1) = float arg_1
  */
 #define UT_FUNC_TYPE_AND_ARG(func, index) FunctionTraits<decltype(&func)>::Arg<index>::Type UT_FUNC_ARG(index)
 
 
 /**
  Helper macros to generate the code for the ut_ functions.
+
  UT_FUNC_ARGS_N generates the parameter list in the function declaration,
  with types and parameter names, e.g. (int arg0, float arg1, ...)
+
  UT_FUNC_FWD_N generates just the parameter names so that the ut_
- function can forward the call to the equivalent mock_
+ function can forward the call to the equivalent mock_, e.g.
+ (arg0, arg1, ...)
+
  */
 #define UT_FUNC_ARGS_0(func)
 #define UT_FUNC_FWD_0
@@ -377,18 +388,18 @@ struct FunctionTraits<R(*)(A...)> {
 
  An example of a call to IMPL_MOCK(4, send) (where send is the BSD socket function):
 
- std::function<ssize_t(int, const void*, size_t, int)> mock_send = send;
-
  extern "C" ssize_t ut_send(int arg0, const void* arg1, size_t arg2, int arg3) {
      return mock_send(arg0, arg1, arg2, arg3);
  }
+ std::function<ssize_t(int, const void*, size_t, int)> mock_send = send
+
 
  */
 #define IMPL_MOCK(num_args, func) \
-    MOCK_STORAGE(func); \
     extern "C" FunctionTraits<decltype(&func)>::ReturnType ut_##func(UT_FUNC_ARGS_##num_args(func)) { \
         return mock_##func(UT_FUNC_FWD_##num_args); \
-    }
+    } \
+    MOCK_STORAGE(func)
 
 
 #endif // MOCK_HPP_
