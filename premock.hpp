@@ -175,6 +175,9 @@ public:
                                        std::to_string(expectedArgsSize));
 
             for(size_t i = start; i < end; ++i) {
+                // it'd be great to tell what was expected and what failed,
+                // but that'd mean the user having to implement operator<<
+                // for anything passed in
                 if(expected[i] != _values[i]) throw MockException("Invocation values do not match");
             }
         }
