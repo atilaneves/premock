@@ -1,14 +1,15 @@
 /**
- This header makes it possible to replace implementations of C functions with C++
- callables for unit testing.
+ This header makes it possible to replace implementations of C
+ functions with C++ callables for unit testing.
 
- It works by using the preprocessor to redefine the functions to be mocked in
- the files to be tested by prepending "ut_" to them instead of calling the "real"
- implementation. This "ut_" function then forwards to a std::function of the
- appropriate type that can be changed in runtime to a C++ callable.
+ It works by using the preprocessor to redefine the functions to be
+ mocked in the files to be tested by prepending "ut_" to them instead
+ of calling the "real" implementation. This "ut_" function then
+ forwards to a std::function of the appropriate type that can be
+ changed in runtime to a C++ callable.
 
- An example of mocking the BSD socket API "send" function would be to have
- a header like this:
+ An example of mocking the BSD socket API "send" function would be to
+ have a header like this:
 
 
  #ifdef PREMOCK_ENABLE
@@ -17,12 +18,13 @@
  #include <sys/socket.h>
 
 
- Which the build system would insert before any other #includes via an option
- to the compiler (-include for gcc/clang)
+ The build system would then insert this header before any other
+ #includes via an option to the compiler (-include for gcc/clang)
 
- Now all calls to "send" are actually to "ut_send". This will fail to link since
- "ut_send" doesn't exist. To implement it, the test binary should be linked with
- an object file from compiling this code (mock_network.cpp):
+ Now all calls to "send" are actually to "ut_send". This will fail to
+ link since "ut_send" doesn't exist. To implement it, the test binary
+ should be linked with an object file from compiling this code
+ (mock_network.cpp):
 
 
  #include "mock_network.hpp"
@@ -37,15 +39,17 @@
  DECL_MOCK(send); // the declaration for the implementation in the cpp file
 
 
- In this example, the build system should pass -DDISABLE_MOCKS when compiling
- mock_network.cpp so that it has access to the "real" send. Now test code can do
- this:
+ In this example, the build system should pass -DDISABLE_MOCKS when
+ compiling mock_network.cpp so that it has access to the "real"
+ send. Now test code can do this:
 
 
  #include "mock_network.hpp"
- auto _ = REPLACE(send, [](auto...) { return 7; });
- // any function that calls send from here until the end of scope
- // will call our lambda instead and always return 7
+ TEST(foo, bar) {
+     auto _ = REPLACE(send, [](auto...) { return 7; });
+     // any function that calls send from here until the end of scope
+     // will call our lambda instead and always return 7
+  }
 
  */
 
