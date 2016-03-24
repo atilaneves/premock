@@ -1,6 +1,7 @@
 #include "catch.hpp"
 #include "premock.hpp"
 #include <functional>
+#include <string>
 
 using namespace std;
 
@@ -13,7 +14,7 @@ TEST_CASE("REPLACE works correctly") {
         REPLACE(twice, [](int i) { return i * 3; });
         REQUIRE(mock_twice(3) == 9);
     }
-    REQUIRE(mock_twice(3) == 6);
+    REQUIRE(mock_twice(3) == 6); //should return to default implementation
 }
 
 
@@ -30,22 +31,48 @@ TEST_CASE("MOCK returnValue") {
         //calling it again should yield the same value
         REQUIRE(mock_twice(3) == 42);
     }
-    REQUIRE(mock_twice(3) == 6);
+    REQUIRE(mock_twice(3) == 6); //should return to default implementation
 }
 
-static int function_that_calls_twice(int i) {
+static int twiceClient(int i) {
     return mock_twice(i + 1);
 }
 
-TEST_CASE("MOCK number of calls") {
+TEST_CASE("MOCK expect calls to twice") {
     auto m = MOCK(twice);
 
     REQUIRE_THROWS(m.expectCalled()); //hasn't been called yet, so...
 
-    function_that_calls_twice(2); //calls the mock_twice
+    twiceClient(2); //calls the mock_twice
     m.expectCalled().withValues(3);
     REQUIRE_THROWS(m.expectCalled()); //was called once, not twice
 
-    for(int i = 0; i < 5; ++i) function_that_calls_twice(i);
+    for(int i = 0; i < 5; ++i) twiceClient(i);
     m.expectCalled(5);//.withValues({make_tuple(1), make_tuple(2), make_tuple(3), make_tuple(4), make_tuple(5)});
+}
+
+
+static function<int(int, string)> mock_binary = [](int i, string s) { return i + s.size(); };
+static int binaryClient(int i, string s) {
+    return mock_binary(i + 2, s + "_foo");
+}
+
+
+TEST_CASE("Mock expect calls to binary") {
+    auto m = MOCK(binary);
+
+    binaryClient(7, "lorem");
+    m.expectCalled().withValues(9, "lorem_foo");
+
+    binaryClient(9, "ipsum");
+    REQUIRE_THROWS(m.expectCalled().withValues(9, "ipsum_foo"));
+
+    binaryClient(9, "ipsum");
+    REQUIRE_THROWS(m.expectCalled().withValues(11, "lorem_foo"));
+
+    binaryClient(9, "ipsum");
+    m.expectCalled().withValues(11, "ipsum_foo");
+
+    for(int i = 0; i < 2; ++i) binaryClient(i, "toto");
+    m.expectCalled(2).withValues({make_tuple(2, "toto_foo"), make_tuple(3, "toto_foo")});
 }
