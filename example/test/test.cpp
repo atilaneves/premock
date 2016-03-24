@@ -72,16 +72,7 @@ int main() {
     }
 
     {
-        auto m = MOCK(other_two);
-        m.returnValue(11, 22, 33);
-        assertEqual(prod_two(99, 999), 11);
-        assertEqual(prod_two(9, 10), 22);
-        assertEqual(prod_two(5, 5), 33);
-        m.expectCalled(3).withValues({make_tuple(98, 1000), make_tuple(8, 11), make_tuple(4, 6)});
-    }
-
-    {
-        auto mock1 = MOCK(other_one);
+        auto mock1 = MOCK(other_one); //because we can
         auto mock2 = MOCK(other_two);
         mock2.returnValue(11, 22, 33);
         assertEqual(prod_two(99, 999), 11);
