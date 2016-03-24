@@ -197,20 +197,6 @@ public:
     }
 
     /**
-     Set the next N return values
-     */
-    template<typename A, typename... As>
-    void returnValueImpl(A arg, As... args) {
-        _returns.push_back(arg);
-        returnValueImpl(args...);
-    }
-
-    /**
-     Recursion terminator
-     */
-    void returnValueImpl() {}
-
-    /**
      Verify the mock was called n times. Returns a ParamChecker so that
      assertions can be made on the passed in parameter values
      */
@@ -228,6 +214,14 @@ private:
     std::deque<ReturnType> _returns;
     int _numCalls{};
     std::deque<TupleType> _values;
+
+    template<typename A, typename... As>
+    void returnValueImpl(A arg, As... args) {
+        _returns.push_back(arg);
+        returnValueImpl(args...);
+    }
+
+    void returnValueImpl() {}
 };
 
 /**
