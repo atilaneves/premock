@@ -128,11 +128,6 @@ public:
     std::string _what;
 };
 
-template<typename... A>
-std::ostream& operator<<(std::ostream& s, const std::tuple<A...>&) {
-    return s;
-}
-
 
 /**
  A mock class to verify expectations of how the mock was called.
