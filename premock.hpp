@@ -153,8 +153,8 @@ public:
          Verifies the parameter values passed in the last invocation
          */
         template<typename... A>
-        void withValues(A... args) {
-            withValues({std::make_tuple(args...)}, _values.size() - 1, _values.size());
+        void withValues(A&&... args) {
+            withValues({std::make_tuple(std::forward<A>(args)...)}, _values.size() - 1, _values.size());
         }
 
         /**
@@ -206,10 +206,10 @@ public:
     /**
      Set the next N return values
      */
-    template<typename... As>
-    void returnValue(As&&... args) {
+    template<typename... A>
+    void returnValue(A&&... args) {
         _returns.clear();
-        returnValueImpl(args...);
+        returnValueImpl(std::forward<A>(args)...);
     }
 
     /**
@@ -236,7 +236,7 @@ private:
     template<typename A, typename... As>
     void returnValueImpl(A&& arg, As&&... args) {
         _returns.emplace_back(arg);
-        returnValueImpl(args...);
+        returnValueImpl(std::forward<As>(args)...);
     }
 
     void returnValueImpl() {}
