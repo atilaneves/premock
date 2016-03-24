@@ -63,7 +63,6 @@
 #include <deque>
 #include <stdexcept>
 
-
 /**
  RAII class for setting a mock to a callable until the end of scope
  */
@@ -121,6 +120,20 @@ struct StdFunctionTraits<std::function<R(A...)>> {
     using TupleType = std::tuple<A...>;
 };
 
+
+class MockException: public std::exception {
+public:
+    MockException(std::string s):_what{std::move(s)} {}
+    const char* what() const noexcept override { return _what.c_str(); }
+    std::string _what;
+};
+
+template<typename... A>
+std::ostream& operator<<(std::ostream& s, const std::tuple<A...>&) {
+    return s;
+}
+
+
 /**
  A mock class to verify expectations of how the mock was called.
  Supports verification of the number of times called, setting
@@ -156,18 +169,27 @@ public:
          */
         void withValues(std::initializer_list<TupleType> args,
                         size_t start = 0, size_t end = 0) {
+
+            if(end == 0) end = _values.size();
             std::deque<TupleType> expected{args};
-            if(expected.size() != args.size()) throw std::logic_error("Wrong size in withValues");
-            if(end == 0) end = expected.size();
+
+            const auto expectedArgsSize = end - start;
+            if(args.size() != expectedArgsSize)
+                throw std::logic_error("ParamChecker::withValues called with " +
+                                       capitalize(args.size(), "value") + ", expected " +
+                                       std::to_string(expectedArgsSize));
+
             for(size_t i = start; i < end; ++i) {
-                if(expected[i] != _values[i])
-                    throw std::logic_error("Called values do not match");
+                if(expected[i] != _values[i]) throw MockException("Invocation values do not match");
             }
         }
 
     private:
 
         std::deque<TupleType> _values;
+        std::string capitalize(int val, const std::string& word) {
+            return val == 1 ? "1 " + word : std::to_string(val) + " " + word + "s";
+        }
     };
 
     /**
@@ -201,7 +223,10 @@ public:
      */
     ParamChecker expectCalled(size_t n = 1) {
 
-        if(_values.size() != n) throw std::logic_error("Was not called enough times");
+        if(_values.size() != n)
+            throw MockException(std::string{"Was not called enough times\n"} +
+                                "Expected: " + std::to_string(n) + "\n" +
+                                "Actual:   " + std::to_string(_values.size()) + "\n");
         auto ret = _values;
         _values.clear();
         return ret;

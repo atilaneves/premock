@@ -48,12 +48,20 @@ TEST_CASE("MOCK expect calls to twice") {
 
     REQUIRE_THROWS(m.expectCalled()); //hasn't been called yet, so...
 
-    twiceClient(2); //calls the mock_twice
+    twiceClient(2); //calls mock_twice internally
     m.expectCalled().withValues(3);
     REQUIRE_THROWS(m.expectCalled()); //was called once, not twice
 
     for(int i = 0; i < 5; ++i) twiceClient(i);
-    m.expectCalled(5);//.withValues({make_tuple(1), make_tuple(2), make_tuple(3), make_tuple(4), make_tuple(5)});
+    m.expectCalled(5).withValues({make_tuple(1), make_tuple(2), make_tuple(3), make_tuple(4), make_tuple(5)});
+
+    for(int i = 0; i < 5; ++i) twiceClient(i);
+    try {
+        m.expectCalled(5).withValues({make_tuple(2), make_tuple(2), make_tuple(3), make_tuple(4), make_tuple(5)});
+        REQUIRE(false); //should never get here
+    } catch(const MockException& ex) {
+        REQUIRE(ex.what() == "Invocation values do not match"s);
+    }
 }
 
 
@@ -61,7 +69,6 @@ static function<int(int, string)> mock_binary = [](int i, string s) { return i +
 static int binaryClient(int i, string s) {
     return mock_binary(i + 2, s + "_foo");
 }
-
 
 TEST_CASE("Mock expect calls to binary") {
     auto m = MOCK(binary);
@@ -80,4 +87,24 @@ TEST_CASE("Mock expect calls to binary") {
 
     for(int i = 0; i < 2; ++i) binaryClient(i, "toto");
     m.expectCalled(2).withValues({make_tuple(2, "toto_foo"), make_tuple(3, "toto_foo")});
+
+    for(int i = 0; i < 2; ++i) binaryClient(i, "toto");
+    try {
+        m.expectCalled(2).withValues({make_tuple(3, "toto_foo"), make_tuple(3, "toto_foo"), make_tuple(3, "toto_foo")});
+        REQUIRE(false); //should never get here
+    } catch(const std::logic_error& ex) {
+        REQUIRE(ex.what() == "ParamChecker::withValues called with 3 values, expected 2"s);
+    }
+
+
+    for(int i = 0; i < 2; ++i) binaryClient(i, "toto");
+    try {
+        m.expectCalled(2).withValues({make_tuple(1, "toto_foo"), make_tuple(3, "toto_foo")});
+        REQUIRE(false); //should never get here
+    } catch(const MockException& ex) {
+        REQUIRE(ex.what() == "Invocation values do not match"s);
+    }
+
+    for(int i = 0; i < 3; ++i) binaryClient(i, "toto");
+    m.expectCalled(3).withValues(2, "toto_foo");
 }
