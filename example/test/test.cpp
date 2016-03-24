@@ -64,7 +64,7 @@ int main() {
 
     {
         auto m = MOCK(two_func);
-        m.returnValues(11, 22, 33);
+        m.returnValue(11, 22, 33);
         assertEqual(prod_two(99, 999), 11);
         assertEqual(prod_two(9, 10), 22);
         assertEqual(prod_two(5, 5), 33);
@@ -73,7 +73,7 @@ int main() {
 
     {
         auto m = MOCK(two_func);
-        m.returnValues(11, 22, 33);
+        m.returnValue(11, 22, 33);
         assertEqual(prod_two(99, 999), 11);
         assertEqual(prod_two(9, 10), 22);
         assertEqual(prod_two(5, 5), 33);
@@ -83,7 +83,7 @@ int main() {
     {
         auto mock1 = MOCK(one_func);
         auto mock2 = MOCK(two_func);
-        mock2.returnValues(11, 22, 33);
+        mock2.returnValue(11, 22, 33);
         assertEqual(prod_two(99, 999), 11);
         assertEqual(prod_two(9, 10), 22);
         assertEqual(prod_two(5, 5), 33);

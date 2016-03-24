@@ -187,35 +187,27 @@ public:
     }
 
     /**
-     Set the next return value
-     */
-    void returnValue(ReturnType r) {
-        _returns.clear();
-        _returns.emplace_back(r);
-    }
-
-    /**
      Set the next N return values
      */
     template<typename... As>
-    void returnValues(As... args) {
+    void returnValue(As... args) {
         _returns.clear();
-        returnValuesImpl(args...);
+        returnValueImpl(args...);
     }
 
     /**
      Set the next N return values
      */
     template<typename A, typename... As>
-    void returnValuesImpl(A arg, As... args) {
+    void returnValueImpl(A arg, As... args) {
         _returns.push_back(arg);
-        returnValuesImpl(args...);
+        returnValueImpl(args...);
     }
 
     /**
      Recursion terminator
      */
-    void returnValuesImpl() {}
+    void returnValueImpl() {}
 
     /**
      Verify the mock was called n times. Returns a ParamChecker so that
