@@ -137,7 +137,7 @@ public:
      Enables checks on parameter values passed to function invocations
      */
     class ParamChecker {
-        public:
+    public:
 
         ParamChecker(std::deque<TupleType> v):_values{v} {}
 
@@ -151,7 +151,8 @@ public:
 
         /**
          Verifies the parameter values passed in all invocations since the last
-         call to `expectCalled`
+         call to `expectCalled`, optionally between the start-th and end-th
+         invocations
          */
         void withValues(std::initializer_list<TupleType> args,
                         size_t start = 0, size_t end = 0) {
@@ -164,7 +165,7 @@ public:
             }
         }
 
-        private:
+    private:
 
         std::deque<TupleType> _values;
     };
