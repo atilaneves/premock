@@ -178,9 +178,8 @@ public:
         _mockScope{func,
             [this](auto... args) {
                 _values.emplace_back(args...);
-                ++_numCalls;
-                auto ret = _returns[0];
-                if(_returns.size()) _returns.pop_front();
+                auto ret = _returns.at(0);
+                if(_returns.size() > 1) _returns.pop_front();
                 return ret;
         }},
     _returns(1) {
@@ -191,7 +190,7 @@ public:
      Set the next N return values
      */
     template<typename... As>
-    void returnValue(As... args) {
+    void returnValue(As&&... args) {
         _returns.clear();
         returnValueImpl(args...);
     }
@@ -200,24 +199,23 @@ public:
      Verify the mock was called n times. Returns a ParamChecker so that
      assertions can be made on the passed in parameter values
      */
-    ParamChecker expectCalled(int n = 1) {
+    ParamChecker expectCalled(size_t n = 1) {
 
-        if(_numCalls != n) throw std::logic_error("Was not called enough times");
-        _numCalls = 0;
-
-        return {_values};
+        if(_values.size() != n) throw std::logic_error("Was not called enough times");
+        auto ret = _values;
+        _values.clear();
+        return ret;
     }
 
 private:
 
     MockScope<T> _mockScope;
     std::deque<ReturnType> _returns;
-    int _numCalls{};
     std::deque<TupleType> _values;
 
     template<typename A, typename... As>
-    void returnValueImpl(A arg, As... args) {
-        _returns.push_back(arg);
+    void returnValueImpl(A&& arg, As&&... args) {
+        _returns.emplace_back(arg);
         returnValueImpl(args...);
     }
 

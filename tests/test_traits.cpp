@@ -1,7 +1,9 @@
 #include "catch.hpp"
 #include "premock.hpp"
 
+
 using namespace std;
+
 
 TEST_CASE("StdFunctionTraits TupleType") {
     static_assert(is_same<StdFunctionTraits<function<int(string, double, const char*)>>::TupleType,
