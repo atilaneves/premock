@@ -54,14 +54,6 @@ TEST_CASE("MOCK expect calls to twice") {
 
     for(int i = 0; i < 5; ++i) twiceClient(i);
     m.expectCalled(5).withValues({make_tuple(1), make_tuple(2), make_tuple(3), make_tuple(4), make_tuple(5)});
-
-    for(int i = 0; i < 5; ++i) twiceClient(i);
-    try {
-        m.expectCalled(5).withValues({make_tuple(2), make_tuple(2), make_tuple(3), make_tuple(4), make_tuple(5)});
-        REQUIRE(false); //should never get here
-    } catch(const MockException& ex) {
-        REQUIRE(ex.what() == "Invocation values do not match"s);
-    }
 }
 
 
@@ -76,18 +68,35 @@ TEST_CASE("Mock expect calls to binary") {
     binaryClient(7, "lorem");
     m.expectCalled().withValues(9, "lorem_foo");
 
+    //1st value wrong, throw
     binaryClient(9, "ipsum");
     REQUIRE_THROWS(m.expectCalled().withValues(9, "ipsum_foo"));
 
+    //2nd value wrong, throw
     binaryClient(9, "ipsum");
     REQUIRE_THROWS(m.expectCalled().withValues(11, "lorem_foo"));
 
+    //both values ok
     binaryClient(9, "ipsum");
     m.expectCalled().withValues(11, "ipsum_foo");
+}
 
+
+TEST_CASE("withValues with initializer list") {
+    auto m = MOCK(binary);
     for(int i = 0; i < 2; ++i) binaryClient(i, "toto");
     m.expectCalled(2).withValues({make_tuple(2, "toto_foo"), make_tuple(3, "toto_foo")});
+}
 
+TEST_CASE("withValues with variadic parameter list after multiple calls") {
+    auto m = MOCK(binary);
+    for(int i = 0; i < 3; ++i) binaryClient(i, "toto");
+    m.expectCalled(3).withValues(2, "toto_foo");
+}
+
+
+TEST_CASE("Right exception message when withValues has wrong argument list size") {
+    auto m = MOCK(binary);
     for(int i = 0; i < 2; ++i) binaryClient(i, "toto");
     try {
         m.expectCalled(2).withValues({make_tuple(3, "toto_foo"), make_tuple(3, "toto_foo"), make_tuple(3, "toto_foo")});
@@ -95,8 +104,11 @@ TEST_CASE("Mock expect calls to binary") {
     } catch(const std::logic_error& ex) {
         REQUIRE(ex.what() == "ParamChecker::withValues called with 3 values, expected 2"s);
     }
+}
 
 
+TEST_CASE("Right exception message when invocation values don't match") {
+    auto m = MOCK(binary);
     for(int i = 0; i < 2; ++i) binaryClient(i, "toto");
     try {
         m.expectCalled(2).withValues({make_tuple(1, "toto_foo"), make_tuple(3, "toto_foo")});
@@ -104,7 +116,4 @@ TEST_CASE("Mock expect calls to binary") {
     } catch(const MockException& ex) {
         REQUIRE(ex.what() == "Invocation values do not match"s);
     }
-
-    for(int i = 0; i < 3; ++i) binaryClient(i, "toto");
-    m.expectCalled(3).withValues(2, "toto_foo");
 }
