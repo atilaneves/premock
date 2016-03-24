@@ -30,6 +30,11 @@ TEST_CASE("MOCK returnValue") {
 
         //calling it again should yield the same value
         REQUIRE(mock_twice(3) == 42);
+
+        m.returnValue(7, 42, 99);
+        REQUIRE(mock_twice(3) == 7);
+        REQUIRE(mock_twice(3) == 42);
+        REQUIRE(mock_twice(3) == 99);
     }
     REQUIRE(mock_twice(3) == 6); //should return to default implementation
 }
