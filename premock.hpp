@@ -377,7 +377,7 @@ struct FunctionTraits<R(*)(A...)> {
 
  extern std::function<int(int, float)> mock_foo;
  */
-#define DECL_MOCK(func) extern thread_local FunctionTraits<decltype(&func)>::StdFunctionType mock_##func
+#define DECL_MOCK(func) extern "C" thread_local FunctionTraits<decltype(&func)>::StdFunctionType mock_##func
 
 /**
  Definition of the std::function that will store the implementation.
@@ -474,16 +474,7 @@ struct FunctionTraits<R(*)(A...)> {
 
 
  */
-#define IMPL_C_MOCK(num_args, func) \
-    extern "C" FunctionTraits<decltype(&func)>::ReturnType ut_##func(UT_FUNC_ARGS_##num_args(func)) { \
-        return mock_##func(UT_FUNC_FWD_##num_args); \
-    } \
-    MOCK_STORAGE(func)
-
-/**
- The C++ version of IMPL_C_MOCK
- */
-#define IMPL_CPP_MOCK(num_args, func) \
+#define IMPL_MOCK(num_args, func) \
     FunctionTraits<decltype(&func)>::ReturnType ut_##func(UT_FUNC_ARGS_##num_args(func)) { \
         return mock_##func(UT_FUNC_FWD_##num_args); \
     } \
