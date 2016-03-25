@@ -35,6 +35,26 @@ objs/example_test.objs/example/test/test.o: example/test/test.cpp Makefile
 -include objs/example_test.objs/example/test/test.o.dep.P
 
 
+objs/example_test.objs/example/test/mock_cpp.o: example/test/mock_cpp.cpp Makefile
+	$(CXX) -Wall -Werror -Wextra -g -fsanitize=address -std=c++14 -I. -Iexample/test -Iexample/src -Iexample/deps -MMD -MT objs/example_test.objs/example/test/mock_cpp.o -MF objs/example_test.objs/example/test/mock_cpp.o.dep -o objs/example_test.objs/example/test/mock_cpp.o -c example/test/mock_cpp.cpp
+	@cp objs/example_test.objs/example/test/mock_cpp.o.dep objs/example_test.objs/example/test/mock_cpp.o.dep.P; \
+    sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\$$//' \
+        -e '/^$$/ d' -e 's/$$/ :/' < objs/example_test.objs/example/test/mock_cpp.o.dep >> objs/example_test.objs/example/test/mock_cpp.o.dep.P; \
+    rm -f objs/example_test.objs/example/test/mock_cpp.o.dep
+
+-include objs/example_test.objs/example/test/mock_cpp.o.dep.P
+
+
+objs/example_test.objs/example/src/cpp_prod.o: example/src/cpp_prod.cpp Makefile
+	$(CXX) -Wall -Werror -Wextra -g -fsanitize=address -include mocks.h -I. -Iexample/test -Iexample/src -Iexample/deps -MMD -MT objs/example_test.objs/example/src/cpp_prod.o -MF objs/example_test.objs/example/src/cpp_prod.o.dep -o objs/example_test.objs/example/src/cpp_prod.o -c example/src/cpp_prod.cpp
+	@cp objs/example_test.objs/example/src/cpp_prod.o.dep objs/example_test.objs/example/src/cpp_prod.o.dep.P; \
+    sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\$$//' \
+        -e '/^$$/ d' -e 's/$$/ :/' < objs/example_test.objs/example/src/cpp_prod.o.dep >> objs/example_test.objs/example/src/cpp_prod.o.dep.P; \
+    rm -f objs/example_test.objs/example/src/cpp_prod.o.dep
+
+-include objs/example_test.objs/example/src/cpp_prod.o.dep.P
+
+
 objs/example_test.objs/example/src/prod.o: example/src/prod.c Makefile
 	$(CC) -Wall -Werror -Wextra -g -fsanitize=address -include mocks.h -I. -Iexample/test -Iexample/src -Iexample/deps -MMD -MT objs/example_test.objs/example/src/prod.o -MF objs/example_test.objs/example/src/prod.o.dep -o objs/example_test.objs/example/src/prod.o -c example/src/prod.c
 	@cp objs/example_test.objs/example/src/prod.o.dep objs/example_test.objs/example/src/prod.o.dep.P; \
@@ -55,8 +75,18 @@ objs/example_test.objs/example/deps/other.o: example/deps/other.c Makefile
 -include objs/example_test.objs/example/deps/other.o.dep.P
 
 
-example_test: objs/example_test.objs/example/test/mock_network.o objs/example_test.objs/example/test/mock_other.o objs/example_test.objs/example/test/test.o objs/example_test.objs/example/src/prod.o objs/example_test.objs/example/deps/other.o Makefile
-	$(CXX) -o example_test -fsanitize=address objs/example_test.objs/example/test/mock_network.o objs/example_test.objs/example/test/mock_other.o objs/example_test.objs/example/test/test.o objs/example_test.objs/example/src/prod.o objs/example_test.objs/example/deps/other.o
+objs/example_test.objs/example/deps/cpp_other.o: example/deps/cpp_other.cpp Makefile
+	$(CXX) -Wall -Werror -Wextra -g -fsanitize=address  -MMD -MT objs/example_test.objs/example/deps/cpp_other.o -MF objs/example_test.objs/example/deps/cpp_other.o.dep -o objs/example_test.objs/example/deps/cpp_other.o -c example/deps/cpp_other.cpp
+	@cp objs/example_test.objs/example/deps/cpp_other.o.dep objs/example_test.objs/example/deps/cpp_other.o.dep.P; \
+    sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\$$//' \
+        -e '/^$$/ d' -e 's/$$/ :/' < objs/example_test.objs/example/deps/cpp_other.o.dep >> objs/example_test.objs/example/deps/cpp_other.o.dep.P; \
+    rm -f objs/example_test.objs/example/deps/cpp_other.o.dep
+
+-include objs/example_test.objs/example/deps/cpp_other.o.dep.P
+
+
+example_test: objs/example_test.objs/example/test/mock_network.o objs/example_test.objs/example/test/mock_other.o objs/example_test.objs/example/test/test.o objs/example_test.objs/example/test/mock_cpp.o objs/example_test.objs/example/src/cpp_prod.o objs/example_test.objs/example/src/prod.o objs/example_test.objs/example/deps/other.o objs/example_test.objs/example/deps/cpp_other.o Makefile
+	$(CXX) -o example_test -fsanitize=address objs/example_test.objs/example/test/mock_network.o objs/example_test.objs/example/test/mock_other.o objs/example_test.objs/example/test/test.o objs/example_test.objs/example/test/mock_cpp.o objs/example_test.objs/example/src/cpp_prod.o objs/example_test.objs/example/src/prod.o objs/example_test.objs/example/deps/other.o objs/example_test.objs/example/deps/cpp_other.o
 objs/ut.objs/tests/main.o: tests/main.cpp Makefile
 	$(CXX) -Wall -Werror -Wextra -g -fsanitize=address -std=c++14 -I. -Itests -MMD -MT objs/ut.objs/tests/main.o -MF objs/ut.objs/tests/main.o.dep -o objs/ut.objs/tests/main.o -c tests/main.cpp
 	@cp objs/ut.objs/tests/main.o.dep objs/ut.objs/tests/main.o.dep.P; \
