@@ -3,7 +3,7 @@
 
 
 #include "premock.hpp"
-#include "mock_other.h"
+#include "other.h"
 
 DECL_MOCK(other_zero);
 DECL_MOCK(other_one);

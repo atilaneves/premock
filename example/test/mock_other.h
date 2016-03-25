@@ -8,7 +8,4 @@
 #    define other_three ut_other_three
 #endif
 
-#include "other.h"
-
-
 #endif // MOCK_OTHER_H_

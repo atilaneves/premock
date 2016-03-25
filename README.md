@@ -20,7 +20,6 @@ have a header like this:
 #ifdef PREMOCK_ENABLE
 #    define send ut_send
 #endif
-#include <sys/socket.h>
 ```
 
 The build system would then insert this header before any other
@@ -42,12 +41,8 @@ This will only compile if a header called `mock_network.hpp` exists with the
 following contents:
 
 ```c++
-// mock_network.h doesn't really need to be included,
-// sys/socket.h would be enough. In practice the mock_*.h headers
-// might contain other includes that would be annoying to replicate
-
-#include "mock_network.h" // the header mentioned above where send -> ut_send
 #include "premock.hpp"
+#include <sys/socket.h> // to have access to send, the original function
 DECL_MOCK(send); // the declaration for the implementation in the cpp file
 ```
 

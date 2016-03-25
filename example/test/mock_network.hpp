@@ -2,7 +2,7 @@
 #define MOCK_NETWORK_HPP_
 
 #include "premock.hpp"
-#include "mock_network.h"
+#include <sys/socket.h>
 
 DECL_MOCK(send);
 

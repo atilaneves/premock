@@ -3,10 +3,10 @@ This header library makes it possible to replace implementations of C
 functions with C++ callables for unit testing.
 
 It works by using the preprocessor to redefine the functions to be
-mocked in the files to be tested by prepending "ut_" to them instead
-of calling the "real" implementation. This "ut_" function then
-forwards to a std::function of the appropriate type that can be
-changed in runtime to a C++ callable.
+mocked in the files to be tested by prepending `ut_` to them instead
+of calling the "real" implementation. This `ut_` function then
+forwards to a `std::function` of the appropriate type that can be
+changed at runtime to a C++ callable.
 
 An example of mocking the BSD socket API `send` function would be to
 have a header like this:
@@ -16,7 +16,6 @@ have a header like this:
 #ifdef PREMOCK_ENABLE
 #    define send ut_send
 #endif
-#include <sys/socket.h>
 ```
 
 The build system would then insert this header before any other
@@ -38,12 +37,8 @@ This will only compile if a header called `mock_network.hpp` exists with the
 following contents:
 
 ```c++
-// mock_network.h doesn't really need to be included,
-// sys/socket.h would be enough. In practice the mock_*.h headers
-// might contain other includes that would be annoying to replicate
-
-#include "mock_network.h" // the header mentioned above where send -> ut_send
 #include "premock.hpp"
+#include <sys/socket.h> // to have access to send, the original function
 DECL_MOCK(send); // the declaration for the implementation in the cpp file
 ```
 
