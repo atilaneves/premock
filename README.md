@@ -17,7 +17,10 @@ have a header like this:
 
 
 ```c
-#define send ut_send
+#infdef MOCK_NETWORK_H
+#define MOCK_NETWORK_H
+#    define send ut_send
+#endif
 ```
 
 The build system would then insert this header before any other
