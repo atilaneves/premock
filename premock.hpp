@@ -31,7 +31,7 @@ should be linked with an object file from compiling this code
 
 ```c++
 #include "mock_network.hpp"
-IMPL_MOCK(4, send); // the 4 is the number of parameters "send" takes
+IMPL_C_MOCK(4, send); // the 4 is the number of parameters "send" takes
 ```
 
 This will only compile if a header called `mock_network.hpp` exists with the
@@ -369,7 +369,7 @@ struct FunctionTraits<R(*)(A...)> {
 
 /**
  Declares a mock function for "real" function func. This is simply the
- declaration, the implementation is done with IMPL_MOCK. If foo has signature:
+ declaration, the implementation is done with IMPL_C_MOCK. If foo has signature:
 
  int foo(int, float);
 
@@ -465,7 +465,7 @@ struct FunctionTraits<R(*)(A...)> {
  whose name begins with ut_, that function must exist or there'll be a linker error.
  The only way to not have to write the function by hand is to use the preprocessor.
 
- An example of a call to IMPL_MOCK(4, send) (where send is the BSD socket function):
+ An example of a call to IMPL_C_MOCK(4, send) (where send is the BSD socket function):
 
  extern "C" ssize_t ut_send(int arg0, const void* arg1, size_t arg2, int arg3) {
      return mock_send(arg0, arg1, arg2, arg3);
@@ -474,8 +474,17 @@ struct FunctionTraits<R(*)(A...)> {
 
 
  */
-#define IMPL_MOCK(num_args, func) \
+#define IMPL_C_MOCK(num_args, func) \
     extern "C" FunctionTraits<decltype(&func)>::ReturnType ut_##func(UT_FUNC_ARGS_##num_args(func)) { \
+        return mock_##func(UT_FUNC_FWD_##num_args); \
+    } \
+    MOCK_STORAGE(func)
+
+/**
+ The C++ version of IMPL_C_MOCK
+ */
+#define IMPL_CPP_MOCK(num_args, func) \
+    FunctionTraits<decltype(&func)>::ReturnType ut_##func(UT_FUNC_ARGS_##num_args(func)) { \
         return mock_##func(UT_FUNC_FWD_##num_args); \
     } \
     MOCK_STORAGE(func)

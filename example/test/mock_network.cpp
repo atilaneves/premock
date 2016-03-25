@@ -1,3 +1,3 @@
 #include "mock_network.hpp"
 
-IMPL_MOCK(4, send);
+IMPL_C_MOCK(4, send);
