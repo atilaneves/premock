@@ -20,7 +20,3 @@ unittest {
     }
     assert(mock_twice(3) == 6); //should return to default implementation
 }
-
-void main() {
-
-}
