@@ -76,6 +76,8 @@ TEST(send, mock) {
 #include <tuple>
 #include <deque>
 #include <stdexcept>
+#include <iostream>
+#include <sstream>
 
 /**
  RAII class for setting a mock to a callable until the end of scope
@@ -140,7 +142,7 @@ struct StdFunctionTraits {};
  */
 template<typename R, typename... A>
 struct StdFunctionTraits<std::function<R(A...)>> {
-    using TupleType = std::tuple<A...>;
+    using TupleType = std::tuple<std::remove_reference_t<A>...>;
 };
 
 
@@ -154,6 +156,57 @@ public:
     std::string _what;
 };
 
+//coming in C++17
+namespace std {
+template<typename... Ts> struct make_void { typedef void type;};
+template<typename... Ts> using void_t = typename make_void<Ts...>::type;
+}
+
+// primary template, default to false for every type
+template<typename, typename = std::void_t<>>
+struct CanBeStreamed: std::false_type {};
+
+// detects when ostream operator<< works on a type
+template<typename T>
+struct CanBeStreamed<T, std::void_t<decltype(std::cout << std::declval<T&>())> >: std::true_type {};
+
+template<typename T>
+std::string toString(const T&, typename std::enable_if<!CanBeStreamed<T>::value>::type* = nullptr) {
+    return "<cannot print>";
+}
+
+template<typename T>
+std::string toString(const T& value, typename std::enable_if<CanBeStreamed<T>::value>::type* = nullptr) {
+    std::stringstream stream;
+    stream << value;
+    return stream.str();
+}
+
+template<int I>
+struct TuplePrinter {
+    template<typename... A>
+    static std::string toString(const std::tuple<A...>& values) {
+        return ::toString(std::get<sizeof...(A) - I>(values)) + ", " + TuplePrinter<I - 1>::toString(values);
+    }
+};
+
+template<>
+struct TuplePrinter<1> {
+    template<typename... A>
+    static std::string toString(const std::tuple<A...>& values) {
+        return ::toString(std::get<sizeof...(A) - 1>(values));
+    }
+};
+
+
+template<typename... A>
+std::string toString(const std::tuple<A...>& values) {
+    return std::string{"("} + TuplePrinter<sizeof...(A)>::toString(values) + ")";
+}
+
+
+// template<typename T>
+// std::string toString(const T&) { return "<cannot print>"; }
 
 /**
  A mock class to verify expectations of how the mock was called.
@@ -192,19 +245,24 @@ public:
                         size_t start = 0, size_t end = 0) {
 
             if(end == 0) end = _values.size();
-            std::deque<TupleType> expected{args};
+            std::deque<TupleType> expected{std::move(args)};
 
             const auto expectedArgsSize = end - start;
-            if(args.size() != expectedArgsSize)
+            if(expected.size() != expectedArgsSize)
                 throw std::logic_error("ParamChecker::withValues called with " +
-                                       capitalize(args.size(), "value") + ", expected " +
+                                       capitalize(expected.size(), "value") + ", expected " +
                                        std::to_string(expectedArgsSize));
 
             for(size_t i = start; i < end; ++i) {
                 // it'd be great to tell what was expected and what failed,
                 // but that'd mean the user having to implement operator<<
                 // for anything passed in
-                if(expected[i] != _values[i]) throw MockException("Invocation values do not match");
+                const auto& expValues = expected.at(i - start);
+                const auto& actValues = _values.at(i);
+                if(expValues != actValues)
+                    throw MockException(std::string{"Invocation values do not match\n"} +
+                                        "Expected: " + toString(expValues) + "\n" +
+                                        "Actual:   " + toString(actValues) + "\n");
             }
         }
 
