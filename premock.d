@@ -29,6 +29,10 @@ auto mockScope(string func)(mockType!func newFunc) {
     return MockScope!(typeof(mock_func))(mock_func, newFunc);
 }
 
+mixin template Replace(string func, string newFunc) {
+    auto _ = mockScope!(func)(mixin(newFunc));
+}
+
 version(unittest) {
     int delegate(int) mock_twice;
 
@@ -41,7 +45,7 @@ version(unittest) {
 unittest {
     import std.conv;
     {
-        auto _ = mockScope!("twice")((int i) { return i * 3; });
+        mixin Replace!("twice", q{i => i * 3});
         assert(mock_twice(3) == 9);
     }
     assert(mock_twice(3) == 6); //should return to default implementation
