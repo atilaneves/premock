@@ -77,6 +77,7 @@ TEST(send, mock) {
 #include <deque>
 #include <stdexcept>
 #include <iostream>
+#include <sstream>
 
 /**
  RAII class for setting a mock to a callable until the end of scope
@@ -155,6 +156,40 @@ public:
     std::string _what;
 };
 
+//coming in C++17
+namespace std {
+template<typename... Ts> struct make_void { typedef void type;};
+template<typename... Ts> using void_t = typename make_void<Ts...>::type;
+}
+
+// primary template, default to false for every type
+template<typename, typename = std::void_t<>>
+struct CanBeStreamed: std::false_type {};
+
+// detects when ostream operator<< works on a type
+template<typename T>
+struct CanBeStreamed<T, std::void_t<decltype(std::cout << std::declval<T&>())> >: std::true_type {};
+
+template<typename T>
+std::string toString(const T&, typename std::enable_if<!CanBeStreamed<T>::value>::type* = nullptr) {
+    return "<cannot print>";
+}
+
+template<typename T>
+std::string toString(const T& value, typename std::enable_if<CanBeStreamed<T>::value>::type* = nullptr) {
+    std::stringstream stream;
+    stream << value;
+    return stream.str();
+}
+
+template<typename... A>
+std::string toString(const std::tuple<A...>& values) {
+    return std::string{"("} + ::toString(std::get<0>(values)) + ")";
+}
+
+
+// template<typename T>
+// std::string toString(const T&) { return "<cannot print>"; }
 
 /**
  A mock class to verify expectations of how the mock was called.
@@ -205,7 +240,10 @@ public:
                 // it'd be great to tell what was expected and what failed,
                 // but that'd mean the user having to implement operator<<
                 // for anything passed in
-                if(expected[i] != _values[i]) throw MockException("Invocation values do not match");
+                if(expected[i] != _values[i])
+                    throw MockException(std::string{"Invocation values do not match\n"} +
+                                        "Expected: " + toString(expected[i]) + "\n" +
+                                        "Actual:   " + toString(_values[i]) + "\n");
             }
         }
 

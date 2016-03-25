@@ -1,7 +1,39 @@
+//so that the types are visible when including premock
+
+#include <iostream>
+
+namespace {
+struct Foo {
+    Foo(int _i):i{_i} {}
+    int i;
+    bool operator==(const Foo& other) const noexcept { return i == other.i; }
+};
+struct Bar {
+    Bar(int _i):i{_i} {}
+    int i;
+    bool operator==(const Bar& other) const noexcept { return i == other.i; }
+};
+}
+
+std::ostream& operator<<(std::ostream& stream, const Foo& foo) {
+    stream << "Foo{" << foo.i << "}";
+    return stream;
+}
+
+
+void useStream() {
+    // just so operator<< above is used by someone and the compiler stops complaining
+    std::cout << Foo{1};
+}
+
+
 #include "catch.hpp"
 #include "premock.hpp"
 #include <functional>
 #include <string>
+
+static_assert(CanBeStreamed<Foo>::value, "Foo should be able to be streamed");
+static_assert(!CanBeStreamed<Bar>::value, "Bar should not be able to be streamed");
 
 
 using namespace std;
@@ -115,52 +147,34 @@ TEST_CASE("Right exception message when invocation values don't match") {
         m.expectCalled(2).withValues({make_tuple(1, "toto_foo"), make_tuple(3, "toto_foo")});
         REQUIRE(false); //should never get here
     } catch(const MockException& ex) {
-        REQUIRE(ex.what() == "Invocation values do not match"s);
+        REQUIRE(ex.what() ==
+                "Invocation values do not match\n"s +
+                "Expected: (1)\n" +
+                "Actual:   (2)\n");
     }
 }
 
-namespace {
-struct Foo {
-    Foo(int _i):i{_i} {}
-    int i;
-    bool operator==(const Foo& other) const noexcept { return i == other.i; }
-};
-struct Bar {
-    Bar(int _i):i{_i} {}
-    int i;
-    bool operator==(const Bar& other) const noexcept { return i == other.i; }
-};
+
+static function<bool(const Foo&, string)> mock_foo = [](const Foo&, string) { return false; };
+static bool fooClient(const Foo& foo, string str) {
+    cout << "WTF? foo is " << foo.i << endl;
+    return mock_foo(Foo{foo.i * 2}, str + "_foo");
 }
-
-ostream& operator<<(ostream& stream, const Foo& foo) {
-    stream << "Foo{" << foo.i << "}";
-    return stream;
-}
-
-
-void useStream() {
-    // just so operator<< above is used by someone and the compiler stops complaining
-    cout << Foo{1};
-}
-
-
-static function<bool(const Foo&)> mock_foo = [](const Foo&) { return false; };
-static bool fooClient(const Foo& foo) { return mock_foo(Foo{foo.i * 2}); }
 
 static function<bool(const Bar&)> mock_bar = [](const Bar&) { return false; };
 static bool barClient(const Bar& bar) { return mock_bar(Bar{bar.i * 3}); }
 
 TEST_CASE("Right exception message when invocation values don't match for streamable values") {
     auto m = MOCK(foo);
-    for(int i = 0; i < 3; ++i) fooClient(Foo{7 + i});
+    for(int i = 0; i < 3; ++i) fooClient(Foo{7 + i}, to_string(i));
     try {
-        m.expectCalled(3).withValues({make_tuple(Foo{13}), make_tuple(Foo{16}), make_tuple(Foo{18})});
+        m.expectCalled(3).withValues({make_tuple(Foo{14}, "0_foo"), make_tuple(Foo{17}, "1_foo"), make_tuple(Foo{18}, "2_foo")});
         REQUIRE(false); //should never get here
     } catch(const MockException& ex) {
         REQUIRE(ex.what() ==
                 "Invocation values do not match\n"s +
-                "Expected: { (Foo{13}), (Foo{16}), (Foo{18}) }\n" +
-                "Actual:   { (Foo{14}), (Foo{16}), (Foo{18}) }\n");
+                "Expected: (Foo{17}, 1_foo)\n" +
+                "Actual:   (Foo{16}, 1_foo)\n");
     }
 }
 
@@ -171,6 +185,9 @@ TEST_CASE("Right exception message when invocation values don't match for unstre
         m.expectCalled().withValues(Bar{20}); //actually 21
         REQUIRE(false); //should never get here
     } catch(const MockException& ex) {
-        REQUIRE(ex.what() == "Invocation values do not match"s);
+        REQUIRE(ex.what() ==
+                "Invocation values do not match\n"s +
+                "Expected: (<cannot print>)\n" +
+                "Actual:   (<cannot print>)\n");
     }
 }
