@@ -45,11 +45,20 @@
 
 
  #include "mock_network.hpp"
- TEST(foo, bar) {
-     auto _ = REPLACE(send, [](auto...) { return 7; });
+ TEST(send, bar) {
+     REPLACE(send, [](auto...) { return 7; });
      // any function that calls send from here until the end of scope
      // will call our lambda instead and always return 7
   }
+
+ TEST(send, mock) {
+     auto m = MOCK(send);
+     m.returnValue(42);
+     // any function that calls send from here until the end of scope
+     // will get a return value of 42
+     function_that_calls_send();
+     m.expectCalled().withValues(3, nullptr, 0, 0);
+ }
 
  */
 
