@@ -64,6 +64,16 @@ TEST(send, mock) {
     function_that_calls_send();
     m.expectCalled().withValues(3, nullptr, 0, 0);
 }
+
+TEST(send, for_reals) {
+    //no MOCK or REPLACE, calling a function that calls send
+    //will call the real McCoy
+    function_that_calls_send(); //this will probably send packets
+}
+
+If neither `REPLACE` nor `MOCK` are used, the original implementation
+will be used.
+
 ```
  */
 

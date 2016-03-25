@@ -4,7 +4,7 @@ premock
 [![Build Status](https://travis-ci.org/atilaneves/premock.png?branch=master)](https://travis-ci.org/atilaneves/premock)
 
 This header library makes it possible to replace implementations of C
-functions with C++ callables for unit testing.
+and C++ functions with C++ callables for unit testing.
 
 It works by using the preprocessor to redefine the functions to be
 mocked in the files to be tested by prepending `ut_` to them instead
@@ -68,7 +68,16 @@ TEST(send, mock) {
     function_that_calls_send();
     m.expectCalled().withValues(3, nullptr, 0, 0);
 }
+
+TEST(send, for_reals) {
+    //no MOCK or REPLACE, calling a function that calls send
+    //will call the real McCoy
+    function_that_calls_send(); //this will probably send packets
+}
 ```
+
+If neither `REPLACE` nor `MOCK` are used, the original implementation
+will be used.
 
 Please consult the [example test file](example/test/test.cpp) or
 the [unit tests](tests) for more.
