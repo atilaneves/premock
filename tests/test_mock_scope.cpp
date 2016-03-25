@@ -149,8 +149,8 @@ TEST_CASE("Right exception message when invocation values don't match") {
     } catch(const MockException& ex) {
         REQUIRE(ex.what() ==
                 "Invocation values do not match\n"s +
-                "Expected: (1)\n" +
-                "Actual:   (2)\n");
+                "Expected: (1, toto_foo)\n" +
+                "Actual:   (2, toto_foo)\n");
     }
 }
 
