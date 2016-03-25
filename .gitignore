@@ -1,6 +1,7 @@
 *.o
 example_cpp_test
 ut_cpp
+ut_d
 .ninja_*
 __pycache__
 *.dep.P

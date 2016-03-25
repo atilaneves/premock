@@ -1,4 +1,4 @@
-from reggae import object_files, link, Build, user_vars
+from reggae import object_files, link, Build, user_vars, scriptlike
 
 
 san_opts = ""
@@ -37,4 +37,8 @@ ut_cpp_objs = object_files(src_dirs=["tests"],
                            includes=[".", "tests"])
 ut_cpp = link(exe_name="ut_cpp", dependencies=ut_cpp_objs, flags=linker_flags)
 
-build = Build(example_cpp_test, ut_cpp)
+ut_d = scriptlike(src_name='premock.d',
+                  exe_name='ut_d',
+                  flags='-unittest')
+
+build = Build(example_cpp_test, ut_cpp, ut_d)
