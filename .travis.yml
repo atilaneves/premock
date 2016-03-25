@@ -1,0 +1,40 @@
+# Use new trusty images, should yield newer compilers and packages
+# Copied from https://github.com/genbattle/dkm/blob/9c893efb556516f4b121a6201b66e000f838dd59/.travis.yml
+# Then modified as required
+
+sudo: required
+dist: precise
+language: cpp
+
+matrix:
+  include:
+    - compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-5
+      env:
+        - CC_COMPILER=gcc-5
+        - CXX_COMPILER=g++-5
+    - compiler: clang
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.7
+          packages:
+            - clang-3.7
+      env:
+        - CC_COMPILER=clang-3.7
+        - CXX_COMPILER=clang++-3.7
+
+install:
+  - mkdir -p objs/example_test.objs/example/{test,deps,src}
+  - mkdir -p objs/ut.objs/tests
+
+script:
+  - make CC=$CC_COMPILER CXX=$CXX_COMPILER
+  - ./ut
+  - ./example_test
