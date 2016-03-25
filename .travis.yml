@@ -36,5 +36,4 @@ install:
 
 script:
   - make CC=$CC_COMPILER CXX=$CXX_COMPILER
-  - ./ut
-  - ./example_test
+  - ./test.sh
