@@ -18,9 +18,14 @@ struct MockScope(T) {
     T _oldFunc;
 }
 
-auto replace(string func)(int delegate(int) newFunc) {
-    enum mock_name = "mock_" ~ func;
-    mixin("alias mock_func = " ~ mock_name ~ ";");
+private string mockName(in string func) {
+    return "mock_" ~ func;
+}
+
+private alias mockType(string func) = typeof(mixin(mockName(func)));
+
+auto replace(string func)(mockType!func newFunc) {
+    mixin("alias mock_func = " ~ mockName(func) ~ ";");
     return MockScope!(typeof(mock_func))(mock_func, newFunc);
 }
 
