@@ -1,4 +1,4 @@
 #!/bin/bash
 set -e
-./ut
-./example_test
+./ut_cpp
+./example_cpp_test

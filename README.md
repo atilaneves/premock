@@ -79,5 +79,5 @@ TEST(send, for_reals) {
 If neither `REPLACE` nor `MOCK` are used, the original implementation
 will be used.
 
-Please consult the [example test file](example/test/test.cpp) or
+Please consult the [example test file](example_cpp/test/test.cpp) or
 the [unit tests](tests) for more.
