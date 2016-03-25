@@ -1,5 +1,8 @@
 module premock;
 
+import std.traits;
+
+
 
 struct MockScope(T) {
     this(T)(ref T oldFunc, T newFunc) {
@@ -54,51 +57,22 @@ unittest {
 
 
 struct Mock(T) {
-
-    import std.traits;
-
     this(ref T func) {
+        import std.array;
 
         _returns = [ReturnType!T.init];
-
         ReturnType!T inner(ParameterTypeTuple!T values) {
-            import std.array;
-
-            import std.stdio;
-            writeln("returns length: ", _returns.length);
-            writeln("returns ptr: ", &_returns);
-            writeln("returns length: ", _returns.length);
-            writeln("returns ptr: ", &_returns);
-
-            //writeln("returns: ", _returns);
-            //writeln("returns: ", &_returns);
-            writeln("huh? returns length: ", _returns.length);
             auto ret = _returns[0];
-            if(_returns.length > 1) {
-                writeln("huh? returns length: ", _returns.length);
-                _returns.popFront;
-            }
-
-            // writeln("returns: ", _returns);
-            // //writeln("returns: ", &_returns);
-
-
-            writeln("Otay. ret: ", ret);
+            if(_returns.length > 1) _returns.popFront;
             return ret;
         }
-
-
-        _scope = MockScope!(typeof(func))(func, &inner);
+        _scope = MockScope!(T)(func, &inner);
     }
 
-    void returnValue(V...)(V values) {
-        import std.stdio;
-        writeln("resetting");
+    void returnValue(V...)(V value) {
         _returns.length = 0;
-        foreach(v; values) _returns ~= v;
+        foreach(v; value) _returns ~= v;
     }
-
-private:
 
     MockScope!T _scope;
     ReturnType!T[] _returns;
@@ -106,7 +80,7 @@ private:
 
 auto mock(string func)() {
     mixin("alias mock_func = " ~ mockName(func) ~ ";");
-    return Mock!(mockType!func)(mock_func);
+    return Mock!(typeof(mock_func))(mock_func);
 }
 
 
@@ -114,26 +88,25 @@ auto mock(string func)() {
 unittest {
     {
         import std.stdio;
+        import std.conv;
 
-        auto m = mock!"twice";
-
+        //auto m = mock!"twice";
+        auto m = Mock!(typeof(mock_twice))(mock_twice);
         // since no return value is set, it returns the default int, 0
         assert(mock_twice(3) == 0);
-        writeln("good stuff");
 
         m.returnValue(42);
         import std.conv;
 
         assert(mock_twice(3) == 42, text(mock_twice(3)));
 
-        // //calling it again should yield the same value
-        // assert(mock_twice(3) == 42);
+        //calling it again should yield the same value
+        assert(mock_twice(3) == 42);
 
-        // m.returnValue(7, 42, 99);
-        // assert(mock_twice(3) == 7);
-        // assert(mock_twice(3) == 42);
-        // assert(mock_twice(3) == 99);
-
+        m.returnValue(7, 42, 99);
+        assert(mock_twice(3) == 7);
+        assert(mock_twice(3) == 42);
+        assert(mock_twice(3) == 99);
     }
-    // assert(mock_twice(3) == 6); //should return to default implementation
+    assert(mock_twice(3) == 6); //should return to default implementation
 }
