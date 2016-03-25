@@ -1,5 +1,6 @@
 #include "mocks.hpp"
 #include "prod.h"
+#include "cpp_prod.hpp"
 #include <iostream>
 #include <string>
 #include <stdexcept>
@@ -79,6 +80,13 @@ int main() {
         assertEqual(prod_two(9, 10), 22);
         assertEqual(prod_two(5, 5), 33);
         mock2.expectCalled(3).withValues({make_tuple(98, 1000), make_tuple(8, 11), make_tuple(4, 6)});
+    }
+
+    {
+        //C++ function mocking
+        auto m = MOCK(twice);
+        prod_twice(2, 3);
+        m.expectCalled().withValues(5);
     }
 
 
