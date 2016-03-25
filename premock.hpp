@@ -142,7 +142,7 @@ struct StdFunctionTraits {};
  */
 template<typename R, typename... A>
 struct StdFunctionTraits<std::function<R(A...)>> {
-    using TupleType = std::tuple<A...>;
+    using TupleType = std::tuple<std::remove_reference_t<A>...>;
 };
 
 

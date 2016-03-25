@@ -155,8 +155,8 @@ TEST_CASE("Right exception message when invocation values don't match") {
 }
 
 
-static function<bool(Foo, string)> mock_foo = [](Foo, string) { return false; };
-static bool fooClient(Foo foo, string str) {
+static function<bool(const Foo&, const string&)> mock_foo = [](const Foo&, const string&) { return false; };
+static bool fooClient(const Foo& foo, const string& str) {
     return mock_foo(Foo{foo.i * 2}, str + "_foo");
 }
 
