@@ -3,6 +3,7 @@
 #include <functional>
 #include <string>
 
+
 using namespace std;
 
 
@@ -112,6 +113,62 @@ TEST_CASE("Right exception message when invocation values don't match") {
     for(int i = 0; i < 2; ++i) binaryClient(i, "toto");
     try {
         m.expectCalled(2).withValues({make_tuple(1, "toto_foo"), make_tuple(3, "toto_foo")});
+        REQUIRE(false); //should never get here
+    } catch(const MockException& ex) {
+        REQUIRE(ex.what() == "Invocation values do not match"s);
+    }
+}
+
+namespace {
+struct Foo {
+    Foo(int _i):i{_i} {}
+    int i;
+    bool operator==(const Foo& other) const noexcept { return i == other.i; }
+};
+struct Bar {
+    Bar(int _i):i{_i} {}
+    int i;
+    bool operator==(const Bar& other) const noexcept { return i == other.i; }
+};
+}
+
+ostream& operator<<(ostream& stream, const Foo& foo) {
+    stream << "Foo{" << foo.i << "}";
+    return stream;
+}
+
+
+void useStream() {
+    // just so operator<< above is used by someone and the compiler stops complaining
+    cout << Foo{1};
+}
+
+
+static function<bool(const Foo&)> mock_foo = [](const Foo&) { return false; };
+static bool fooClient(const Foo& foo) { return mock_foo(Foo{foo.i * 2}); }
+
+static function<bool(const Bar&)> mock_bar = [](const Bar&) { return false; };
+static bool barClient(const Bar& bar) { return mock_bar(Bar{bar.i * 3}); }
+
+TEST_CASE("Right exception message when invocation values don't match for streamable values") {
+    auto m = MOCK(foo);
+    for(int i = 0; i < 3; ++i) fooClient(Foo{7 + i});
+    try {
+        m.expectCalled(3).withValues({make_tuple(Foo{13}), make_tuple(Foo{16}), make_tuple(Foo{18})});
+        REQUIRE(false); //should never get here
+    } catch(const MockException& ex) {
+        REQUIRE(ex.what() ==
+                "Invocation values do not match\n"s +
+                "Expected: { (Foo{13}), (Foo{16}), (Foo{18}) }\n" +
+                "Actual:   { (Foo{14}), (Foo{16}), (Foo{18}) }\n");
+    }
+}
+
+TEST_CASE("Right exception message when invocation values don't match for unstreamable values") {
+    auto m = MOCK(bar);
+    barClient(Bar{7});
+    try {
+        m.expectCalled().withValues(Bar{20}); //actually 21
         REQUIRE(false); //should never get here
     } catch(const MockException& ex) {
         REQUIRE(ex.what() == "Invocation values do not match"s);

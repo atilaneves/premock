@@ -76,6 +76,7 @@ TEST(send, mock) {
 #include <tuple>
 #include <deque>
 #include <stdexcept>
+#include <iostream>
 
 /**
  RAII class for setting a mock to a callable until the end of scope
