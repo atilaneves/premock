@@ -46,5 +46,5 @@ rule _phony
   command = $cmd
 
 rule _rerun
-  command = reggae --cxx=clang++ --cc=clang --export .
+  command = reggae --cxx=clang++ --cc=clang --export
   generator = 1

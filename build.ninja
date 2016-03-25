@@ -3,64 +3,62 @@ include rules.ninja
 # Do not edit by hand
 build objs/example_test.objs/example/test/mock_network.o: _cppcompile example/test/mock_network.cpp
   includes = -I. -Iexample/test -Iexample/src -Iexample/deps
-  flags = -Wall -Werror -Wextra -g -fsanitize=address -std=c++14
+  flags = -Wall -Werror -Wextra -g -std=c++14
   DEPFILE = example/test/mock_network.o.dep
 
 build objs/example_test.objs/example/test/mock_other.o: _cppcompile example/test/mock_other.cpp
   includes = -I. -Iexample/test -Iexample/src -Iexample/deps
-  flags = -Wall -Werror -Wextra -g -fsanitize=address -std=c++14
+  flags = -Wall -Werror -Wextra -g -std=c++14
   DEPFILE = example/test/mock_other.o.dep
 
 build objs/example_test.objs/example/test/test.o: _cppcompile example/test/test.cpp
   includes = -I. -Iexample/test -Iexample/src -Iexample/deps
-  flags = -Wall -Werror -Wextra -g -fsanitize=address -std=c++14
+  flags = -Wall -Werror -Wextra -g -std=c++14
   DEPFILE = example/test/test.o.dep
 
 build objs/example_test.objs/example/test/mock_cpp.o: _cppcompile example/test/mock_cpp.cpp
   includes = -I. -Iexample/test -Iexample/src -Iexample/deps
-  flags = -Wall -Werror -Wextra -g -fsanitize=address -std=c++14
+  flags = -Wall -Werror -Wextra -g -std=c++14
   DEPFILE = example/test/mock_cpp.o.dep
 
 build objs/example_test.objs/example/src/cpp_prod.o: _cppcompile example/src/cpp_prod.cpp
   includes = -I. -Iexample/test -Iexample/src -Iexample/deps
-  flags = -Wall -Werror -Wextra -g -fsanitize=address -include mocks.h
+  flags = -Wall -Werror -Wextra -g -include mocks.h
   DEPFILE = example/src/cpp_prod.o.dep
 
 build objs/example_test.objs/example/src/prod.o: _ccompile example/src/prod.c
   includes = -I. -Iexample/test -Iexample/src -Iexample/deps
-  flags = -Wall -Werror -Wextra -g -fsanitize=address -include mocks.h
+  flags = -Wall -Werror -Wextra -g -include mocks.h
   DEPFILE = example/src/prod.o.dep
 
 build objs/example_test.objs/example/deps/other.o: _ccompile example/deps/other.c
-  flags = -Wall -Werror -Wextra -g -fsanitize=address
+  flags = -Wall -Werror -Wextra -g
   DEPFILE = example/deps/other.o.dep
 
 build objs/example_test.objs/example/deps/cpp_other.o: _cppcompile example/deps/cpp_other.cpp
-  flags = -Wall -Werror -Wextra -g -fsanitize=address
+  flags = -Wall -Werror -Wextra -g
   DEPFILE = example/deps/cpp_other.o.dep
 
 build example_test: _cpplink objs/example_test.objs/example/test/mock_network.o objs/example_test.objs/example/test/mock_other.o objs/example_test.objs/example/test/test.o objs/example_test.objs/example/test/mock_cpp.o objs/example_test.objs/example/src/cpp_prod.o objs/example_test.objs/example/src/prod.o objs/example_test.objs/example/deps/other.o objs/example_test.objs/example/deps/cpp_other.o
-  flags = -fsanitize=address
 
 build objs/ut.objs/tests/main.o: _cppcompile tests/main.cpp
   includes = -I. -Itests
-  flags = -Wall -Werror -Wextra -g -fsanitize=address -std=c++14
+  flags = -Wall -Werror -Wextra -g -std=c++14
   DEPFILE = tests/main.o.dep
 
 build objs/ut.objs/tests/test_mock_scope.o: _cppcompile tests/test_mock_scope.cpp
   includes = -I. -Itests
-  flags = -Wall -Werror -Wextra -g -fsanitize=address -std=c++14
+  flags = -Wall -Werror -Wextra -g -std=c++14
   DEPFILE = tests/test_mock_scope.o.dep
 
 build objs/ut.objs/tests/test_traits.o: _cppcompile tests/test_traits.cpp
   includes = -I. -Itests
-  flags = -Wall -Werror -Wextra -g -fsanitize=address -std=c++14
+  flags = -Wall -Werror -Wextra -g -std=c++14
   DEPFILE = tests/test_traits.o.dep
 
 build objs/ut.objs/tests/test_exceptions.o: _cppcompile tests/test_exceptions.cpp
   includes = -I. -Itests
-  flags = -Wall -Werror -Wextra -g -fsanitize=address -std=c++14
+  flags = -Wall -Werror -Wextra -g -std=c++14
   DEPFILE = tests/test_exceptions.o.dep
 
 build ut: _cpplink objs/ut.objs/tests/main.o objs/ut.objs/tests/test_mock_scope.o objs/ut.objs/tests/test_traits.o objs/ut.objs/tests/test_exceptions.o
-  flags = -fsanitize=address

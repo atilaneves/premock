@@ -1,12 +1,16 @@
-from reggae import object_files, link, Build
+from reggae import object_files, link, Build, user_vars
 
+
+san_opts = ""
+if 'production' in user_vars:
+    san_opts = '-fsanitize=address'
 
 includes = [".", "example/test", "example/src", "example/deps"]
-common_flags = "-Wall -Werror -Wextra -g -fsanitize=address"
+common_flags = san_opts + " -Wall -Werror -Wextra -g"
 c_flags = common_flags
 prod_flags = c_flags + " -include mocks.h"
 cpp_flags = common_flags + " -std=c++14"
-linker_flags = '-fsanitize=address'
+linker_flags = san_opts
 
 # production code we want to test
 prod_objs = object_files(src_dirs=["example/src"],
