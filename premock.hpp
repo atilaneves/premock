@@ -31,7 +31,7 @@ should be linked with an object file from compiling this code
 
 ```c++
 #include "mock_network.hpp"
-IMPL_C_MOCK(4, send); // the 4 is the number of parameters "send" takes
+extern "C" IMPL_MOCK(4, send); // the 4 is the number of parameters "send" takes
 ```
 
 This will only compile if a header called `mock_network.hpp` exists with the
@@ -170,11 +170,13 @@ struct CanBeStreamed: std::false_type {};
 template<typename T>
 struct CanBeStreamed<T, std::void_t<decltype(std::cout << std::declval<T&>())> >: std::true_type {};
 
+// default implementation for types that don't define operator<<
 template<typename T>
 std::string toString(const T&, typename std::enable_if<!CanBeStreamed<T>::value>::type* = nullptr) {
     return "<cannot print>";
 }
 
+// implementation for types that can be streamed (and therefore printed)
 template<typename T>
 std::string toString(const T& value, typename std::enable_if<CanBeStreamed<T>::value>::type* = nullptr) {
     std::stringstream stream;
@@ -182,14 +184,21 @@ std::string toString(const T& value, typename std::enable_if<CanBeStreamed<T>::v
     return stream.str();
 }
 
+// helper class to print std::tuple. A class is used instead of a function to
+// enable partial template specialization
 template<int I>
 struct TuplePrinter {
     template<typename... A>
     static std::string toString(const std::tuple<A...>& values) {
-        return ::toString(std::get<sizeof...(A) - I>(values)) + ", " + TuplePrinter<I - 1>::toString(values);
+        // since C++ doesn't allow forward loops in compile-time,
+        // we recurse from N down, and print from 0 up
+        return ::toString(std::get<sizeof...(A) - I>(values)) +
+            ", " + TuplePrinter<I - 1>::toString(values);
     }
 };
 
+// recursion terminator. This ends at 1 because the last value to be printed
+// is the number of elements in the tuple - 1. It's "backwards" recursion
 template<>
 struct TuplePrinter<1> {
     template<typename... A>
@@ -199,14 +208,12 @@ struct TuplePrinter<1> {
 };
 
 
+// template specialization for std::tuple
 template<typename... A>
 std::string toString(const std::tuple<A...>& values) {
     return std::string{"("} + TuplePrinter<sizeof...(A)>::toString(values) + ")";
 }
 
-
-// template<typename T>
-// std::string toString(const T&) { return "<cannot print>"; }
 
 /**
  A mock class to verify expectations of how the mock was called.
@@ -340,7 +347,7 @@ Mock<T> mock(T& func) {
 #define MOCK(func) mock(mock_##func)
 
 /**
- Traits class for functions
+ Traits class for function pointers
  */
 template<typename>
 struct FunctionTraits;
@@ -465,7 +472,8 @@ struct FunctionTraits<R(*)(A...)> {
  whose name begins with ut_, that function must exist or there'll be a linker error.
  The only way to not have to write the function by hand is to use the preprocessor.
 
- An example of a call to IMPL_C_MOCK(4, send) (where send is the BSD socket function):
+ An example of a call to IMPL_MOCK(4, send) (where send is the BSD socket function)
+ assuming the macro is used in an extern "C" block:
 
  extern "C" ssize_t ut_send(int arg0, const void* arg1, size_t arg2, int arg3) {
      return mock_send(arg0, arg1, arg2, arg3);

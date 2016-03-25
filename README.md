@@ -35,7 +35,7 @@ should be linked with an object file from compiling this code
 
 ```c++
 #include "mock_network.hpp"
-IMPL_C_MOCK(4, send); // the 4 is the number of parameters "send" takes
+extern "C" IMPL_MOCK(4, send); // the 4 is the number of parameters "send" takes
 ```
 
 This will only compile if a header called `mock_network.hpp` exists with the
