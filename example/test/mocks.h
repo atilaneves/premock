@@ -3,5 +3,6 @@
 
 #include "mock_network.h"
 #include "mock_other.h"
+#include "mock_cpp.h"
 
 #endif // MOCKS_H_
