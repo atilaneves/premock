@@ -17,7 +17,7 @@ have a header like this:
 
 
 ```c
-#infdef MOCK_NETWORK_H
+#ifndef MOCK_NETWORK_H
 #define MOCK_NETWORK_H
 #    define send ut_send
 #endif
