@@ -254,9 +254,6 @@ public:
                                        std::to_string(expectedArgsSize));
 
             for(size_t i = start; i < end; ++i) {
-                // it'd be great to tell what was expected and what failed,
-                // but that'd mean the user having to implement operator<<
-                // for anything passed in
                 const auto& expValues = expected.at(i - start);
                 const auto& actValues = _values.at(i);
                 if(expValues != actValues)
