@@ -228,22 +228,24 @@ public:
                         size_t start = 0, size_t end = 0) {
 
             if(end == 0) end = _values.size();
-            std::deque<TupleType> expected{args};
+            std::deque<TupleType> expected{std::move(args)};
 
             const auto expectedArgsSize = end - start;
-            if(args.size() != expectedArgsSize)
+            if(expected.size() != expectedArgsSize)
                 throw std::logic_error("ParamChecker::withValues called with " +
-                                       capitalize(args.size(), "value") + ", expected " +
+                                       capitalize(expected.size(), "value") + ", expected " +
                                        std::to_string(expectedArgsSize));
 
             for(size_t i = start; i < end; ++i) {
                 // it'd be great to tell what was expected and what failed,
                 // but that'd mean the user having to implement operator<<
                 // for anything passed in
-                if(expected[i] != _values[i])
+                const auto& expValues = expected.at(i - start);
+                const auto& actValues = _values.at(i);
+                if(expValues != actValues)
                     throw MockException(std::string{"Invocation values do not match\n"} +
-                                        "Expected: " + toString(expected[i]) + "\n" +
-                                        "Actual:   " + toString(_values[i]) + "\n");
+                                        "Expected: " + toString(expValues) + "\n" +
+                                        "Actual:   " + toString(actValues) + "\n");
             }
         }
 

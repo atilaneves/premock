@@ -123,8 +123,8 @@ TEST_CASE("withValues with initializer list") {
 
 TEST_CASE("withValues with variadic parameter list after multiple calls") {
     auto m = MOCK(binary);
-    for(int i = 0; i < 3; ++i) binaryClient(i, "toto");
-    m.expectCalled(3).withValues(2, "toto_foo");
+    for(int i = 0; i < 3; ++i) binaryClient(i, "boom");
+    m.expectCalled(3).withValues(4, "boom_foo");
 }
 
 
@@ -157,11 +157,9 @@ TEST_CASE("Right exception message when invocation values don't match") {
 
 static function<bool(const Foo&, string)> mock_foo = [](const Foo&, string) { return false; };
 static bool fooClient(const Foo& foo, string str) {
+    //cout << "i is " << foo.i << " and s is " << str << endl;
     return mock_foo(Foo{foo.i * 2}, str + "_foo");
 }
-
-static function<bool(const Bar&)> mock_bar = [](const Bar&) { return false; };
-static bool barClient(const Bar& bar) { return mock_bar(Bar{bar.i * 3}); }
 
 TEST_CASE("Right exception message when invocation values don't match for streamable values") {
     auto m = MOCK(foo);
@@ -176,6 +174,9 @@ TEST_CASE("Right exception message when invocation values don't match for stream
                 "Actual:   (Foo{16}, 1_foo)\n");
     }
 }
+
+static function<bool(const Bar&)> mock_bar = [](const Bar&) { return false; };
+static bool barClient(const Bar& bar) { return mock_bar(Bar{bar.i * 3}); }
 
 TEST_CASE("Right exception message when invocation values don't match for unstreamable values") {
     auto m = MOCK(bar);
