@@ -88,8 +88,12 @@ template<typename T>
 class MockScope {
 public:
 
+    // assumes T is a std::function
     using ReturnType = typename T::result_type;
 
+    /**
+     Replace func with scopeFunc until the end of scope.
+     */
     template<typename F>
     MockScope(T& func, F scopeFunc):
         _func{func},
@@ -99,6 +103,9 @@ public:
     }
 
 
+    /**
+     Restore func to its original value
+     */
     ~MockScope() {
         _func = std::move(_oldFunc);
     }
@@ -121,7 +128,9 @@ MockScope<T> mockScope(T& func, F scopeFunc) {
 /**
  Temporarily replace func with the passed-in lambda:
  e.g.
- auto mock = REPLACE(send, [](auto...) { return -1; })
+
+ REPLACE(send, [](auto...) { return -1; });
+
  This causes every call to `send` in the production code to
  return -1 no matter what
  */
@@ -139,6 +148,9 @@ struct StdFunctionTraits<std::function<R(A...)>> {
 };
 
 
+/**
+ An exception class to throw when a mock expectation isn't met
+ */
 class MockException: public std::exception {
 public:
     MockException(std::string s):_what{std::move(s)} {}

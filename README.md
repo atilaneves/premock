@@ -7,10 +7,10 @@ This header library makes it possible to replace implementations of C
 functions with C++ callables for unit testing.
 
 It works by using the preprocessor to redefine the functions to be
-mocked in the files to be tested by prepending "ut_" to them instead
-of calling the "real" implementation. This "ut_" function then
-forwards to a std::function of the appropriate type that can be
-changed in runtime to a C++ callable.
+mocked in the files to be tested by prepending `ut_` to them instead
+of calling the "real" implementation. This `ut_` function then
+forwards to a `std::function` of the appropriate type that can be
+changed at runtime to a C++ callable.
 
 An example of mocking the BSD socket API `send` function would be to
 have a header like this:
