@@ -50,3 +50,38 @@ unittest {
     }
     assert(mock_twice(3) == 6); //should return to default implementation
 }
+
+
+struct Mock(T) {
+    void returnValue(V...)(V) {
+
+    }
+}
+
+auto mock(string func)() {
+    return Mock!(mockType!func)();
+}
+
+
+@("mock returnValue")
+unittest {
+    {
+        auto m = mock!"twice";
+
+        // since no return value is set, it returns the default int, 0
+        assert(mock_twice(3) == 0);
+
+        m.returnValue(42);
+        assert(mock_twice(3) == 42);
+
+        //calling it again should yield the same value
+        assert(mock_twice(3) == 42);
+
+        m.returnValue(7, 42, 99);
+        assert(mock_twice(3) == 7);
+        assert(mock_twice(3) == 42);
+        assert(mock_twice(3) == 99);
+
+    }
+    assert(mock_twice(3) == 6); //should return to default implementation
+}
