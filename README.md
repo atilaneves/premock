@@ -24,12 +24,14 @@ have a header like this:
 ```
 
 The build system would then insert this header before any other
-#includes via an option to the compiler (`-include` for gcc/clang)
+`#includes` via an option to the compiler (`-include` for gcc/clang).
+It should also define `PREMOCK_ENABLE` for the production files to
+be compiled with mocking support.
 
 Now all calls to `send` are actually to `ut_send`. This will fail to
 link since `ut_send` doesn't exist. To implement it, the test binary
 should be linked with an object file from compiling this code
-(`mock_network.cpp`):
+(e.g. called `mock_network.cpp`):
 
 ```c++
 #include "mock_network.hpp"
@@ -40,14 +42,18 @@ This will only compile if a header called `mock_network.hpp` exists with the
 following contents:
 
 ```c++
+// mock_network.h doesn't really need to be included,
+// sys/socket.h would be enough. In practice the mock_*.h headers
+// might contain other includes that would be annoying to replicate
+
 #include "mock_network.h" // the header mentioned above where send -> ut_send
 #include "premock.hpp"
 DECL_MOCK(send); // the declaration for the implementation in the cpp file
 ```
 
-In this example, the build system should pass `-DDISABLE_MOCKS` when
-compiling `mock_network.cpp` so that it has access to the "real"
-`send`. Now test code can do this:
+In this example, `PREMOCK_ENABLE` should not be defined for the
+`mock_*.cpp` files so they have access to the "real" `send`.  Now
+test code can do this:
 
 ```c++
 #include "mock_network.hpp"
@@ -66,7 +72,6 @@ TEST(send, mock) {
     function_that_calls_send();
     m.expectCalled().withValues(3, nullptr, 0, 0);
 }
-
 ```
 
 Please consult the [example test file](example/test/test.cpp) or
