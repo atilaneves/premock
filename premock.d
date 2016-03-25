@@ -26,7 +26,7 @@ private alias mockType(string func) = typeof(mixin(mockName(func)));
 
 auto mockScope(string func)(mockType!func newFunc) {
     mixin("alias mock_func = " ~ mockName(func) ~ ";");
-    return MockScope!(typeof(mock_func))(mock_func, newFunc);
+    return MockScope!(mockType!func)(mock_func, newFunc);
 }
 
 mixin template Replace(string func, string newFunc) {
@@ -53,13 +53,29 @@ unittest {
 
 
 struct Mock(T) {
+
+    this(ref T func) {
+        import std.traits;
+
+        auto inner(ParameterTypeTuple!func values) {
+            return ReturnType!func.init;
+        }
+
+        _scope = MockScope!(typeof(func))(func, &inner);
+    }
+
     void returnValue(V...)(V) {
 
     }
+
+private:
+
+    MockScope!T _scope;
 }
 
 auto mock(string func)() {
-    return Mock!(mockType!func)();
+    mixin("alias mock_func = " ~ mockName(func) ~ ";");
+    return Mock!(mockType!func)(mock_func);
 }
 
 
