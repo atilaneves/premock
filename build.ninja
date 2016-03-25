@@ -18,7 +18,7 @@ build objs/example_test.objs/example/test/test.o: _cppcompile example/test/test.
 
 build objs/example_test.objs/example/src/prod.o: _ccompile example/src/prod.c
   includes = -I. -Iexample/test -Iexample/src -Iexample/deps
-  flags = -Wall -Werror -Wextra -g -DPREMOCK_ENABLE -include mocks.h
+  flags = -Wall -Werror -Wextra -g -include mocks.h
   DEPFILE = example/src/prod.o.dep
 
 build objs/example_test.objs/example/deps/other.o: _ccompile example/deps/other.c

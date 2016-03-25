@@ -4,7 +4,7 @@ from reggae import object_files, link, Build
 includes = [".", "example/test", "example/src", "example/deps"]
 common_flags = "-Wall -Werror -Wextra -g"
 c_flags = common_flags
-prod_flags = c_flags + " -DPREMOCK_ENABLE -include mocks.h"
+prod_flags = c_flags + " -include mocks.h"
 cpp_flags = common_flags + " -std=c++14"
 
 # production code we want to test

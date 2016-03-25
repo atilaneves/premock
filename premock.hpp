@@ -13,15 +13,13 @@ have a header like this:
 
 
 ```c
-#ifdef PREMOCK_ENABLE
-#    define send ut_send
-#endif
+#define send ut_send
 ```
 
 The build system would then insert this header before any other
 `#includes` via an option to the compiler (`-include` for gcc/clang).
-It should also define `PREMOCK_ENABLE` for the production files to
-be compiled with mocking support.
+This could also be done with `-D` but in the case of multiple
+functions it's easier to have all the redefinitions in one header.
 
 Now all calls to `send` are actually to `ut_send`. This will fail to
 link since `ut_send` doesn't exist. To implement it, the test binary

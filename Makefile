@@ -36,7 +36,7 @@ objs/example_test.objs/example/test/test.o: example/test/test.cpp Makefile
 
 
 objs/example_test.objs/example/src/prod.o: example/src/prod.c Makefile
-	$(CC) -Wall -Werror -Wextra -g -DPREMOCK_ENABLE -include mocks.h -I. -Iexample/test -Iexample/src -Iexample/deps -MMD -MT objs/example_test.objs/example/src/prod.o -MF objs/example_test.objs/example/src/prod.o.dep -o objs/example_test.objs/example/src/prod.o -c example/src/prod.c
+	$(CC) -Wall -Werror -Wextra -g -include mocks.h -I. -Iexample/test -Iexample/src -Iexample/deps -MMD -MT objs/example_test.objs/example/src/prod.o -MF objs/example_test.objs/example/src/prod.o.dep -o objs/example_test.objs/example/src/prod.o -c example/src/prod.c
 	@cp objs/example_test.objs/example/src/prod.o.dep objs/example_test.objs/example/src/prod.o.dep.P; \
     sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\$$//' \
         -e '/^$$/ d' -e 's/$$/ :/' < objs/example_test.objs/example/src/prod.o.dep >> objs/example_test.objs/example/src/prod.o.dep.P; \
