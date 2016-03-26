@@ -1,7 +1,8 @@
 module premock;
 
-import std.traits;
 
+import std.traits;
+import std.typecons;
 
 
 struct MockScope(T) {
@@ -76,6 +77,15 @@ struct Mock(T) {
         foreach(v; value) _returns ~= v;
     }
 
+    auto expectCalled(int n = 1) {
+        struct ParamChecker {
+            void withValues(V...)(V values) {
+
+            }
+        }
+        return ParamChecker();
+    }
+
     MockScope!T _scope;
     ReturnType!T[] _returns;
 }
@@ -111,4 +121,26 @@ unittest {
         assert(mock_twice(3) == 99);
     }
     assert(mock_twice(3) == 6); //should return to default implementation
+}
+
+version(unittest) {
+    private int twiceClient(int i) {
+        return mock_twice(i + 1);
+    }
+}
+
+@("MOCK expect calls to twice")
+unittest {
+    import std.exception;
+
+    mixin mock!"twice";
+
+    assertThrown(m.expectCalled()); //hasn't been called yet, so...
+
+    twiceClient(2); //calls mock_twice internally
+    m.expectCalled().withValues(3);
+    assertThrown(m.expectCalled()); //was called once, not twice
+
+    for(int i = 0; i < 5; ++i) twiceClient(i);
+    m.expectCalled(5).withValues(tuple(1), tuple(2), tuple(3), tuple(4), tuple(5));
 }
