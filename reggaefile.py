@@ -50,7 +50,7 @@ d_objs = object_files(src_dirs=["example_d"],
                       flags='-g -unittest',
                       includes=[".", "example_d"])
 ut_d = link(exe_name="ut_d",
-            dependencies=[d_objs, prod_objs, mock_objs, dep_objs],
+            dependencies=[d_objs, prod_objs, dep_objs],
             flags="-L-lstdc++")
 
 
