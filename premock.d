@@ -69,8 +69,8 @@ version(unittest) {
 unittest {
     import std.conv;
     {
-        //mixin replace!("twice_ut", q{ i => i * 3});
-        auto _ = replace!("twice_ut")(i => i * 3);
+        mixin replace2!("twice_ut", q{ i => i * 3 });
+        //auto _ = replace!("twice_ut")(i => i * 3);
         assert(mock_twice_ut(3) == 9);
     }
 

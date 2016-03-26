@@ -34,11 +34,11 @@ void main() {
     // descriptor
     assertEqual(cast(int)prod_send(0), -1); //some weird cast is going on...
 
-    // {
-    //     mixin mock!"send";
-    //     prod_send(3);
-    //     m.expectCalled().withValues(3, null, 0, 0);
-    // }
+    {
+        mixin mock!"send";
+        prod_send(3);
+        m.expectCalled().withValues(3, cast(const(void)*)null, 0UL, 0);
+    }
 
     {
         mixin mock!"other_two";
