@@ -41,6 +41,10 @@ private U toDelegate(U, T)(T f) {
         return cast(U)f;
 }
 
+auto mockScope(T, U)(ref T oldFunc, U newFunc) {
+    return MockScope!T(oldFunc, newFunc);
+}
+
 string mockName(in string func) {
     return "mock_" ~ func;
 }

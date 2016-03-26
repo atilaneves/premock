@@ -23,10 +23,8 @@ void assertEqual(A, E)(A actual, E expected, in string file = __FILE__, in ulong
 
 void main() {
     {
-        auto _ = MockScope!(typeof(mock_send))(mock_send, { return 7; });
-        immutable ret = 7L;
-        //replace!"send"({ return ret; });
-        assertEqual(prod_send(0), ret);
+        auto _ = mockScope(mock_send, { return 7; });
+        assertEqual(prod_send(0), 7);
     }
 
     // out of scope, send reverts to the "real" implementation
