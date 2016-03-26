@@ -7,6 +7,10 @@ import std.conv;
 import std.exception;
 import std.meta;
 
+version(unittest) {
+    import core.exception;
+}
+
 struct MockScope(T) {
     this(T)(ref T oldFunc, T newFunc) {
         _oldFuncPtr = &oldFunc;
@@ -86,7 +90,7 @@ struct Mock(T) {
     }
 
     auto expectCalled(int n = 1, string file = __FILE__, ulong line = cast(ulong)__LINE__) {
-        struct ParamChecker {
+        struct ParamCheck {
 
             Tuple!(Parameters!T)[] _values;
 
@@ -118,7 +122,7 @@ struct Mock(T) {
 
         auto oldValues = _values;
         _values.length = 0;
-        return ParamChecker(oldValues);
+        return ParamCheck(oldValues);
     }
 
 private:
@@ -133,8 +137,8 @@ private:
 
     static void throwValueException(U, V)(U expected, V actual) {
          throw new MockException(text("Invocation values do not match\n",
-                                                     "Expected: ", expected, "\n",
-                                                     "Actual:   ", actual, "\n"));
+                                      "Expected: ", expected, "\n",
+                                      "Actual:   ", actual, "\n"));
 
     }
 }
@@ -220,4 +224,44 @@ version(unittest) {
     //both values ok
     binaryClient(9, "ipsum");
     m.expectCalled().withValues(11, "ipsum_foo");
+}
+
+
+@("withValues with initializer list") unittest {
+    mixin mock!"binary";
+    for(int i = 0; i < 2; ++i) binaryClient(i, "toto");
+    m.expectCalled(2).withValues(tuple(2, "toto_foo"), tuple(3, "toto_foo"));
+}
+
+@("withValues with variadic parameter list after multiple calls") unittest {
+    mixin mock!"binary";
+    for(int i = 0; i < 3; ++i) binaryClient(i, "boom");
+    m.expectCalled(3).withValues(4, "boom_foo");
+}
+
+
+@("Right exception message when withValues has wrong argument list size") unittest {
+    mixin mock!"binary";
+    for(int i = 0; i < 2; ++i) binaryClient(i, "toto");
+    try {
+        m.expectCalled(2).withValues(tuple(3, "toto_foo"), tuple(3, "toto_foo"), tuple(3, "toto_foo"));
+        assert(false); //should never get here
+    } catch(AssertError ex) {
+        assert(ex.msg == "ParamCheck.withValues called with 3 values, expected 2");
+    }
+}
+
+
+@("Right exception message when invocation values don't match") unittest {
+    mixin mock!"binary";
+    for(int i = 0; i < 2; ++i) binaryClient(i, "toto");
+    try {
+        m.expectCalled(2).withValues(tuple(1, "toto_foo"), tuple(3, "toto_foo"));
+        assert(false); //should never get here
+    } catch(MockException ex) {
+        assert(ex.msg ==
+               "Invocation values do not match\n" ~
+               "Expected: Tuple!(int, string)(1, \"toto_foo\")\n" ~
+               "Actual:   Tuple!(int, string)(2, \"toto_foo\")\n");
+    }
 }
