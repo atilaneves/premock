@@ -268,14 +268,14 @@ mixin template ImplMock(string func, R, T...) {
     mixin(q{ extern(C) R } ~ func ~ q{ (T); });
 }
 
-string implMockStr(string func, R, T...)() {
-    return q{ extern(C) } ~ R.stringof ~ " " ~ func ~ T.stringof ~ ";" ~ "\n" ~
+string implMockStr(string lang, string func, R, T...)() {
+    return "extern(" ~ lang ~ ")" ~ R.stringof ~ " " ~ func ~ T.stringof ~ ";" ~ "\n" ~
                             R.stringof ~ " delegate" ~ T.stringof ~ " mock_" ~ func ~ ";" ~ "\n" ~
                             `static this() { ` ~ "\n" ~
                             `    mock_` ~ func ~ ` = ` ~ argNamesParens(T.length) ~ ` => ` ~ func ~ argNamesParens(T.length) ~ ";\n" ~
                             "}\n" ~
-                              "extern(C) " ~ R.stringof ~ " ut_" ~ func ~ typeAndArgsParens!T ~ " {\n" ~
-                            "    return mock_send" ~ argNamesParens(T.length) ~ ";\n" ~
+                              "extern(" ~ lang ~ ") " ~ R.stringof ~ " ut_" ~ func ~ typeAndArgsParens!T ~ " {\n" ~
+                            "    return mock_" ~ func ~ argNamesParens(T.length) ~ ";\n" ~
                             "}";
 
 }
