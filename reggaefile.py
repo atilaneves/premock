@@ -49,11 +49,9 @@ d_objs = object_files(src_dirs=["example_d"],
                       src_files=["premock.d"],
                       flags='-g -unittest',
                       includes=[".", "example_d"])
-ut_d = Target("ut_d", "clang++ -o $out $in -lphobos2",
-              [d_objs, prod_objs, mock_objs, dep_objs])
-# ut_d = link(exe_name="ut_d",
-#             dependencies=[d_objs, prod_objs, mock_objs],
-#             flags="-llibstdc++")
+ut_d = link(exe_name="ut_d",
+            dependencies=[d_objs, prod_objs, mock_objs, dep_objs],
+            flags="-L-lstdc++")
 
 
 build = Build(example_cpp_test, ut_cpp, ut_d)
