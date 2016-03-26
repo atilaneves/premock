@@ -34,13 +34,9 @@ private string mockName(in string func) {
 
 private alias mockType(string func) = typeof(mixin(mockName(func)));
 
-auto mockScope(string func)(mockType!func newFunc) {
+auto replace(string func)(mockType!func newFunc) {
     mixin("alias mock_func = " ~ mockName(func) ~ ";");
     return MockScope!(mockType!func)(mock_func, newFunc);
-}
-
-mixin template Replace(string func, string newFunc) {
-    auto _ = mockScope!(func)(mixin(newFunc));
 }
 
 version(unittest) {
@@ -55,9 +51,10 @@ version(unittest) {
 unittest {
     import std.conv;
     {
-        mixin Replace!("twice", q{i => i * 3});
+        auto _ = replace!("twice")(i => i * 3);
         assert(mock_twice(3) == 9);
     }
+
     assert(mock_twice(3) == 6); //should return to default implementation
 }
 

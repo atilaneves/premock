@@ -90,5 +90,5 @@ int main() {
     }
 
 
-    cout << "Ok" << endl;
+    cout << "Ok C++" << endl;
 }
