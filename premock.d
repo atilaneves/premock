@@ -28,11 +28,11 @@ struct MockScope(T) {
     T _oldFunc;
 }
 
-private string mockName(in string func) {
+string mockName(in string func) {
     return "mock_" ~ func;
 }
 
-private alias mockType(string func) = typeof(mixin(mockName(func)));
+alias mockType(string func) = typeof(mixin(mockName(func)));
 
 auto replace(string func)(mockType!func newFunc) {
     mixin("alias mock_func = " ~ mockName(func) ~ ";");
@@ -40,10 +40,10 @@ auto replace(string func)(mockType!func newFunc) {
 }
 
 version(unittest) {
-    int delegate(int) mock_twice;
+    int delegate(int) mock_twice_ut;
 
     static this() {
-        mock_twice = (i) => i * 2;
+        mock_twice_ut = (i) => i * 2;
     }
 }
 
@@ -51,11 +51,11 @@ version(unittest) {
 unittest {
     import std.conv;
     {
-        auto _ = replace!("twice")(i => i * 3);
-        assert(mock_twice(3) == 9);
+        auto _ = replace!("twice_ut")(i => i * 3);
+        assert(mock_twice_ut(3) == 9);
     }
 
-    assert(mock_twice(3) == 6); //should return to default implementation
+    assert(mock_twice_ut(3) == 6); //should return to default implementation
 }
 
 
@@ -152,30 +152,30 @@ unittest {
         import std.stdio;
         import std.conv;
 
-        mixin mock!"twice";
+        mixin mock!"twice_ut";
 
         // since no return value is set, it returns the default int, 0
-        assert(mock_twice(3) == 0);
+        assert(mock_twice_ut(3) == 0);
 
         m.returnValue(42);
         import std.conv;
 
-        assert(mock_twice(3) == 42, text(mock_twice(3)));
+        assert(mock_twice_ut(3) == 42, text(mock_twice_ut(3)));
 
         //calling it again should yield the same value
-        assert(mock_twice(3) == 42);
+        assert(mock_twice_ut(3) == 42);
 
         m.returnValue(7, 42, 99);
-        assert(mock_twice(3) == 7);
-        assert(mock_twice(3) == 42);
-        assert(mock_twice(3) == 99);
+        assert(mock_twice_ut(3) == 7);
+        assert(mock_twice_ut(3) == 42);
+        assert(mock_twice_ut(3) == 99);
     }
-    assert(mock_twice(3) == 6); //should return to default implementation
+    assert(mock_twice_ut(3) == 6); //should return to default implementation
 }
 
 version(unittest) {
     private int twiceClient(int i) {
-        return mock_twice(i + 1);
+        return mock_twice_ut(i + 1);
     }
 }
 
@@ -183,7 +183,7 @@ version(unittest) {
 unittest {
     import std.exception;
 
-    mixin mock!"twice";
+    mixin mock!"twice_ut";
 
     assertThrown!MockException(m.expectCalled()); //hasn't been called yet, so...
 
