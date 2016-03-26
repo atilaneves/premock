@@ -262,3 +262,38 @@ version(unittest) {
                "Actual:   Tuple!(int, string)(2, \"toto_foo\")\n");
     }
 }
+
+
+mixin template ImplMock(string func, R, T...) {
+    mixin(q{ extern(C) R } ~ func ~ q{ (T); });
+}
+
+string implMockStr(string func, R, T...)() {
+    return q{ extern(C) } ~ R.stringof ~ " " ~ func ~ T.stringof ~ ";" ~ "\n" ~
+                            R.stringof ~ " delegate" ~ T.stringof ~ " mock_" ~ func ~ ";" ~ "\n" ~
+                            `static this() { ` ~ "\n" ~
+                            `    mock_` ~ func ~ ` = ` ~ argNamesParens(T.length) ~ ` => ` ~ func ~ argNamesParens(T.length) ~ ";\n" ~
+                            "}\n" ~
+                              "extern(C) " ~ R.stringof ~ " ut_" ~ func ~ typeAndArgsParens!T ~ " {\n" ~
+                            "    return mock_send" ~ argNamesParens(T.length) ~ ";\n" ~
+                            "}";
+
+}
+
+string argNamesParens(int N) {
+    return "(" ~ argNames(N) ~ ")";
+}
+
+string argNames(int N) {
+    import std.range;
+    import std.algorithm;
+    return iota(N).map!(a => "arg" ~ a.to!string).join(", ");
+}
+
+string typeAndArgsParens(T...)() {
+    import std.array;
+    string[] parts;
+    foreach(i, t; T)
+        parts ~= T[i].stringof ~ " arg" ~ i.to!string;
+    return "(" ~ parts.join(", ") ~ ")";
+}
