@@ -11,11 +11,12 @@ version(unittest) {
     import core.exception;
 }
 
-struct MockScope(T) {
-    this(T)(ref T oldFunc, T newFunc) {
+struct MockScope(T) if(isDelegate!T) {
+
+    this(U)(ref T oldFunc, U newFunc) {
         _oldFuncPtr = &oldFunc;
         _oldFunc = oldFunc;
-        oldFunc = newFunc;
+        oldFunc = toDelegate!T(newFunc);
     }
 
     ~this() {
@@ -28,6 +29,14 @@ struct MockScope(T) {
     T _oldFunc;
 }
 
+private U toDelegate(U, T)(T f) {
+    static if(!isDelegate!T) {
+        int i;
+        return cast(U){ ++i; return f(); };
+    } else
+        return cast(U)f;
+}
+
 string mockName(in string func) {
     return "mock_" ~ func;
 }
@@ -38,6 +47,8 @@ auto replace(string func)(mockType!func newFunc) {
     mixin("alias mock_func = " ~ mockName(func) ~ ";");
     return MockScope!(mockType!func)(mock_func, newFunc);
 }
+
+//mixin template replace2(string func)
 
 version(unittest) {
     int delegate(int) mock_twice_ut;

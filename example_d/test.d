@@ -23,12 +23,11 @@ void assertEqual(A, E)(A actual, E expected, in string file = __FILE__, in ulong
 
 void main() {
     {
-        //auto _ = replace!("send")({ return 7; });// (int, const void*, size_t, int) { return 7; });
-        //typeof(mock_send) repl = cast(typeof(mock_send)){ return 7; };
-        typeof(mock_send) repl = delegate(int, const void*, size_t, int) { return cast(long)7; };
-        auto _ = MockScope!(typeof(mock_send))(mock_send, repl);
-        //auto _ = MockScope!(typeof(mock_send))(mock_send, delegate(int, const void*, size_t, int) { return 7; });
-        assertEqual(prod_send(0), 7);
+        auto _ = MockScope!(typeof(mock_send))(mock_send, { return 7; }); //not so much
+        immutable ret = 7L;
+        //auto _ = MockScope!(typeof(mock_send))(mock_send, cast(typeof(mock_send)){ return ret; }); //works
+        //replace!"send"({ return ret; });
+        assertEqual(prod_send(0), ret);
     }
 
     // out of scope, send reverts to the "real" implementation
@@ -76,5 +75,5 @@ void main() {
     }
 
 
-    writeln("Ok D");
+    writeln("Ok D   Example");
 }
