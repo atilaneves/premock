@@ -5,7 +5,8 @@ san_opts = ""
 if 'production' in user_vars:
     san_opts = '-fsanitize=address'
 
-includes = [".", "example_cpp/test", "example_cpp/src", "example_cpp/deps"]
+includes = [".", "example_cpp/test", "example_cpp/src",
+            "example_cpp/deps", "example_cpp/mocks"]
 common_flags = san_opts + " -Wall -Werror -Wextra -g"
 c_flags = common_flags
 prod_flags = c_flags + " -include mocks.h"
@@ -22,13 +23,19 @@ dep_objs = object_files(src_dirs=["example_cpp/deps"],
                         flags=c_flags)
 
 # Test code where the mock implementations live
+mock_objs = object_files(src_dirs=["example_cpp/mocks"],
+                         includes=includes,
+                         flags=cpp_flags)
+
+# The unit tests themselves
 test_objs = object_files(src_dirs=["example_cpp/test"],
                          includes=includes,
                          flags=cpp_flags)
 
 # The example_cpp binary
 example_cpp_test = link(exe_name="example_cpp_test",
-                        dependencies=[test_objs, prod_objs, dep_objs],
+                        dependencies=[test_objs, prod_objs,
+                                      dep_objs, mock_objs],
                         flags=linker_flags)
 
 # Unit tests for premock itself
@@ -42,8 +49,11 @@ d_objs = object_files(src_dirs=["example_d"],
                       src_files=["premock.d"],
                       flags='-g -unittest',
                       includes=[".", "example_d"])
-ut_d = link(exe_name="ut_d",
-            dependencies=[d_objs, prod_objs])
+ut_d = Target("ut_d", "clang++ -o $out $in -lphobos2",
+              [d_objs, prod_objs, mock_objs, dep_objs])
+# ut_d = link(exe_name="ut_d",
+#             dependencies=[d_objs, prod_objs, mock_objs],
+#             flags="-llibstdc++")
 
 
 build = Build(example_cpp_test, ut_cpp, ut_d)

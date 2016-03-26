@@ -19,7 +19,7 @@ void main() {
         auto _ = MockScope!(typeof(mock_send))(mock_send, repl);
         //auto _ = MockScope!(typeof(mock_send))(mock_send, delegate(int, const void*, size_t, int) { return 7; });
         //assertEqual(prod_send(0), 7);
-        assert(prod_send(0) == 7);
+        assert(prod_send(0) == 7, text(prod_send(0)));
     }
 
     // out of scope, send reverts to the "real" implementation
