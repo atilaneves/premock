@@ -23,9 +23,8 @@ void assertEqual(A, E)(A actual, E expected, in string file = __FILE__, in ulong
 
 void main() {
     {
-        auto _ = MockScope!(typeof(mock_send))(mock_send, { return 7; }); //not so much
+        auto _ = MockScope!(typeof(mock_send))(mock_send, { return 7; });
         immutable ret = 7L;
-        //auto _ = MockScope!(typeof(mock_send))(mock_send, cast(typeof(mock_send)){ return ret; }); //works
         //replace!"send"({ return ret; });
         assertEqual(prod_send(0), ret);
     }

@@ -31,8 +31,12 @@ struct MockScope(T) if(isDelegate!T) {
 
 private U toDelegate(U, T)(T f) {
     static if(!isDelegate!T) {
-        int i;
-        return cast(U){ ++i; return f(); };
+        int i; //just so it's captured
+        mixin(q{ return cast(U) } ~ typeAndArgsParens!(Parameters!T) ~ "{\n" ~
+              q{ ++i; } ~
+              "return f" ~ argNamesParens(Parameters!T.length) ~ ";\n" ~
+              "};");
+
     } else
         return cast(U)f;
 }
@@ -48,7 +52,10 @@ auto replace(string func)(mockType!func newFunc) {
     return MockScope!(mockType!func)(mock_func, newFunc);
 }
 
-//mixin template replace2(string func)
+mixin template replace2(string func, string newFunc, string varName = "_") {
+
+    mixin("auto " ~ varName ~ q{ = MockScope!(mockType!func)(} ~ mockName(func) ~ ", " ~ "(int i){return i * 3; }" ~ ");");
+}
 
 version(unittest) {
     int delegate(int) mock_twice_ut;
@@ -62,6 +69,7 @@ version(unittest) {
 unittest {
     import std.conv;
     {
+        //mixin replace!("twice_ut", q{ i => i * 3});
         auto _ = replace!("twice_ut")(i => i * 3);
         assert(mock_twice_ut(3) == 9);
     }
