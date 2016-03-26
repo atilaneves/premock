@@ -16,7 +16,7 @@ extern(C) {
 extern(C++) int prod_twice(int i, int j);
 
 
-void assertEqual(A, E)(A actual, E expected, in string file = __FILE__, in ulong line = cast(ulong)__LINE__) {
+void assertEqual(A, E)(A actual, E expected, in string file = __FILE__, in size_t line = __LINE__) {
     if(actual != expected) throw new Exception(text("\nExpected: ", expected,
                                                     "\nActual:   ", actual), file, line);
 }
@@ -37,6 +37,31 @@ void main() {
         prod_send(3);
         m.expectCalled().withValues(3, cast(const(void)*)null, 0UL, 0);
     }
+
+    // {
+    //     immutable ret = 3;
+    //     replace(mock_other_zero, { return ret; });
+    //     assertEqual(prod_zero(), ret);
+    // }
+
+    // {
+    //     replace(mock_other_one, (int i) { return 4 * i; });
+    //     assertEqual(prod_one(8), 36);
+    // }
+    // {
+    //     replace(mock_other_two, (int i, int j) { return i + j + 1; });
+    //     assertEqual(prod_two(3, 4), 8);
+    // }
+    // {
+    //     replace(mock_other_three, (double, int j, const char*) {
+    //         assert(j != 2);
+    //     });
+    //     prod_three(0, 1, null);
+    //     try {
+    //         prod_three(0, 0, null); //should throw
+    //         assert(0); //should never get here
+    //     } catch(Exception ex) { }
+    // }
 
     {
         mixin mock!"other_two";
