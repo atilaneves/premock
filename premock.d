@@ -4,7 +4,8 @@ module premock;
 import std.traits;
 import std.typecons;
 import std.conv;
-
+import std.exception;
+import std.meta;
 
 struct MockScope(T) {
     this(T)(ref T oldFunc, T newFunc) {
@@ -89,8 +90,22 @@ struct Mock(T) {
 
             Tuple!(Parameters!T)[] _values;
 
-            void withValues(V...)(V values) {
+            void withValues(V...)(V values) if(is(V == Parameters!T)) {
+                auto expected = tuple(values);
+                if(expected != _values[$ - 1]) throwValueException(expected, _values[$ - 1]);
+            }
 
+            enum isParamTuple(U) = is(U == Tuple!(Parameters!T));
+
+            void withValues(V...)(V values) if(allSatisfy!(isParamTuple, V)) {
+
+                assert(V.length == _values.length,
+                       text("ParamCheck.withValues called with ",
+                            capitalize(V.length, "value"), ", expected ", _values.length));
+
+                foreach(i, v; values) {
+                    if(v != _values[i]) throwValueException(values[i], _values[i]);
+                }
             }
         }
 
@@ -106,9 +121,22 @@ struct Mock(T) {
         return ParamChecker(oldValues);
     }
 
+private:
+
     MockScope!T _scope;
     ReturnType!T[] _returns;
     Tuple!(Parameters!T)[] _values;
+
+    static string capitalize(int val, string word) {
+        return val == 1 ? "1 " ~ word : val.to!string ~ " " ~ word ~ "s";
+    }
+
+    static void throwValueException(U, V)(U expected, V actual) {
+         throw new MockException(text("Invocation values do not match\n",
+                                                     "Expected: ", expected, "\n",
+                                                     "Actual:   ", actual, "\n"));
+
+    }
 }
 
 
@@ -164,4 +192,32 @@ unittest {
 
     for(int i = 0; i < 5; ++i) twiceClient(i);
     m.expectCalled(5).withValues(tuple(1), tuple(2), tuple(3), tuple(4), tuple(5));
+}
+
+
+version(unittest) {
+    private int delegate(int, string) mock_binary;
+    static this() {
+        mock_binary = (i, s) => i + cast(int)s.length;
+    }
+    private int binaryClient(int i, string s) { return mock_binary(i + 2, s ~ "_foo"); }
+}
+
+@("mock expect calls to binary") unittest {
+    mixin mock!"binary";
+
+    binaryClient(7, "lorem");
+    m.expectCalled().withValues(9, "lorem_foo");
+
+    //1st value wrong, throw
+    binaryClient(9, "ipsum");
+    assertThrown!MockException(m.expectCalled().withValues(9, "ipsum_foo"));
+
+    //2nd value wrong, throw
+    binaryClient(9, "ipsum");
+    assertThrown!MockException(m.expectCalled().withValues(11, "lorem_foo"));
+
+    //both values ok
+    binaryClient(9, "ipsum");
+    m.expectCalled().withValues(11, "ipsum_foo");
 }
