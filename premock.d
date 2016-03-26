@@ -3,6 +3,7 @@ module premock;
 
 import std.traits;
 import std.typecons;
+import std.conv;
 
 
 struct MockScope(T) {
@@ -56,15 +57,21 @@ unittest {
 }
 
 
+class MockException: Exception {
+    this(string msg, string file = __FILE__, ulong line = cast(ulong)__LINE__, Throwable next = null) {
+        super(msg, file, line, next);
+    }
+}
 
 struct Mock(T) {
     this(ref T func) {
         import std.array;
-        import std.stdio;
 
         _returns = [ReturnType!T.init];
 
-        ReturnType!T inner(ParameterTypeTuple!T values) {
+        ReturnType!T inner(Parameters!T values) {
+            _values ~= tuple(values);
+
             auto ret = _returns[0];
             if(_returns.length > 1) _returns.popFront;
             return ret;
@@ -77,17 +84,31 @@ struct Mock(T) {
         foreach(v; value) _returns ~= v;
     }
 
-    auto expectCalled(int n = 1) {
+    auto expectCalled(int n = 1, string file = __FILE__, ulong line = cast(ulong)__LINE__) {
         struct ParamChecker {
+
+            Tuple!(Parameters!T)[] _values;
+
             void withValues(V...)(V values) {
 
             }
         }
-        return ParamChecker();
+
+        if(_values.length != n) {
+            throw new MockException(text("Was not called enough times\n",
+                                         "Expected: ", n, "\n",
+                                         "Actual:   ", _values.length, "\n"),
+                                    file, line);
+        }
+
+        auto oldValues = _values;
+        _values.length = 0;
+        return ParamChecker(oldValues);
     }
 
     MockScope!T _scope;
     ReturnType!T[] _returns;
+    Tuple!(Parameters!T)[] _values;
 }
 
 
@@ -135,11 +156,11 @@ unittest {
 
     mixin mock!"twice";
 
-    assertThrown(m.expectCalled()); //hasn't been called yet, so...
+    assertThrown!MockException(m.expectCalled()); //hasn't been called yet, so...
 
     twiceClient(2); //calls mock_twice internally
     m.expectCalled().withValues(3);
-    assertThrown(m.expectCalled()); //was called once, not twice
+    assertThrown!MockException(m.expectCalled()); //was called once, not twice
 
     for(int i = 0; i < 5; ++i) twiceClient(i);
     m.expectCalled(5).withValues(tuple(1), tuple(2), tuple(3), tuple(4), tuple(5));
