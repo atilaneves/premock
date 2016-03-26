@@ -41,7 +41,7 @@ private U toDelegate(U, T)(T f) {
         return cast(U)f;
 }
 
-auto mockScope(T, U)(ref T oldFunc, U newFunc) {
+auto replace(T, U)(ref T oldFunc, U newFunc) {
     return MockScope!T(oldFunc, newFunc);
 }
 
@@ -51,15 +51,6 @@ string mockName(in string func) {
 
 alias mockType(string func) = typeof(mixin(mockName(func)));
 
-auto replace(string func)(mockType!func newFunc) {
-    mixin("alias mock_func = " ~ mockName(func) ~ ";");
-    return MockScope!(mockType!func)(mock_func, newFunc);
-}
-
-mixin template replace2(string func, string newFunc, string varName = "_") {
-
-    mixin("auto " ~ varName ~ q{ = MockScope!(mockType!func)(} ~ mockName(func) ~ ", " ~ "(int i){return i * 3; }" ~ ");");
-}
 
 version(unittest) {
     int delegate(int) mock_twice_ut;
@@ -73,8 +64,7 @@ version(unittest) {
 unittest {
     import std.conv;
     {
-        mixin replace2!("twice_ut", q{ i => i * 3 });
-        //auto _ = replace!("twice_ut")(i => i * 3);
+        auto _ = replace(mock_twice_ut, (int i) { return i * 3; });
         assert(mock_twice_ut(3) == 9);
     }
 

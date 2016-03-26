@@ -23,7 +23,7 @@ void assertEqual(A, E)(A actual, E expected, in string file = __FILE__, in ulong
 
 void main() {
     {
-        auto _ = mockScope(mock_send, { return 7; });
+        auto _ = replace(mock_send, { return 7; });
         assertEqual(prod_send(0), 7);
     }
 
