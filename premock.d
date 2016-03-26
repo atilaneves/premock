@@ -62,10 +62,8 @@ struct Mock(T) {
         import std.stdio;
 
         _returns = [ReturnType!T.init];
-        writeln("Original _returns ptr: ", _returns.ptr);
 
         ReturnType!T inner(ParameterTypeTuple!T values) {
-            writeln("Inner _returns ptr: ", _returns.ptr);
             auto ret = _returns[0];
             if(_returns.length > 1) _returns.popFront;
             return ret;
@@ -76,8 +74,6 @@ struct Mock(T) {
     void returnValue(V...)(V value) {
         _returns.length = 0;
         foreach(v; value) _returns ~= v;
-        import std.stdio;
-        writeln("returnValue _returns ptr: ", _returns.ptr);
     }
 
     MockScope!T _scope;
@@ -85,11 +81,7 @@ struct Mock(T) {
 }
 
 
-auto mock(T)(ref T dg) {
-    return Mock!(typeof(dg))(dg);
-}
-
-mixin template MOCK(string func, string varName = "m") {
+mixin template mock(string func, string varName = "m") {
     enum autoDecl = "auto " ~ varName;
     mixin(autoDecl ~ q{ = Mock!(typeof(mixin(mockName(func))))(mixin(mockName(func))); });
 }
@@ -100,10 +92,7 @@ unittest {
         import std.stdio;
         import std.conv;
 
-        //auto m = mock!"twice";
-        auto m = mock(mock_twice);
-        //auto m = Mock!(typeof(mock_twice))(mock_twice);
-        //mixin MOCK!"twice";
+        mixin mock!"twice";
 
         // since no return value is set, it returns the default int, 0
         assert(mock_twice(3) == 0);
