@@ -23,7 +23,7 @@ void assertEqual(A, E)(A actual, E expected, in string file = __FILE__, in size_
 
 void main() {
     {
-        auto _ = replace(mock_send, { return 7; });
+        mixin replace!("send", (a, b, c, d) => 7);
         assertEqual(prod_send(0), 7);
     }
 
@@ -40,20 +40,20 @@ void main() {
 
     {
         immutable ret = 3;
-        auto _ = replace(mock_other_zero, { return ret; });
+        mixin replace!("other_zero", { return ret; });
         assertEqual(prod_zero(), ret);
     }
 
     {
-        auto _ = replace(mock_other_one, (int i) { return 4 * i; });
+        mixin replace!("other_one", (int i) { return 4 * i; });
         assertEqual(prod_one(8), 36);
     }
     {
-        auto _ = replace(mock_other_two, (int i, int j) { return i + j + 1; });
+        mixin replace!("other_two", (int i, int j) { return i + j + 1; });
         assertEqual(prod_two(3, 4), 8);
     }
     {
-        auto _ = replace(mock_other_three, (double, int j, const char*) {
+        mixin replace!("other_three", (double, int j, const char*) {
             assert(j != 2);
         });
         prod_three(0, 1, null);

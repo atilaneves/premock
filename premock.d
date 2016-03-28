@@ -33,7 +33,7 @@ struct NewMockScope(T, alias F) if(isDelegate!T) {
     this(ref T oldFunc) {
         _oldFuncPtr = &oldFunc;
         _oldFunc = oldFunc;
-        oldFunc = newtoDelegate!(T, F);
+        oldFunc = toDelegate!(T, F);
     }
 
     ~this() {
@@ -46,7 +46,7 @@ private:
     T _oldFunc;
 }
 
-private T newtoDelegate(T, alias F)() {
+private T toDelegate(T, alias F)() {
     static if(!isDelegate!F) {
         int i; //just so it's captured
         mixin(q{ return cast(T) } ~ typeAndArgsParens!(Parameters!T) ~ "{\n" ~
@@ -55,7 +55,7 @@ private T newtoDelegate(T, alias F)() {
               "};");
 
     } else
-        return cast(U)f;
+        return cast(T)F;
 }
 
 
@@ -64,12 +64,16 @@ auto mockScope(alias F, T)(ref T oldFunc) {
     return m;
 }
 
+mixin template replace(string func, alias F, string varName = "_") {
+    mixin("auto " ~ varName ~ q{ = mockScope!F( } ~ mockName(func) ~ ");");
+}
+
 @("MockScope ctor/dtor") unittest {
     int delegate(int, string) mock_foo = (i, s) => i + cast(int)s.length;
     assert(mock_foo(7, "foo") == 10);
 
     {
-        auto _ = mockScope!((i, s) => i + 1 - cast(int)s.length)(mock_foo);
+        mixin replace!("foo", (i, s) => i + 1 - cast(int)s.length);
         assert(mock_foo(7, "foo") == 5, mock_foo(7, "foo").to!string);
     }
 
@@ -88,11 +92,6 @@ private U toDelegate(U, T)(T f) {
         return cast(U)f;
 }
 
-auto replace(T, U)(ref T oldFunc, U newFunc) {
-    auto m = MockScope!T(oldFunc, newFunc);
-    return m;
-}
-
 string mockName(in string func) {
     return "mock_" ~ func;
 }
@@ -106,17 +105,6 @@ version(unittest) {
     static this() {
         mock_twice_ut = (i) => i * 2;
     }
-}
-
-@("replace works correctly")
-unittest {
-    import std.conv;
-    {
-        auto _ = replace(mock_twice_ut, (int i) { return i * 3; });
-        assert(mock_twice_ut(3) == 9);
-    }
-
-    assert(mock_twice_ut(3) == 6); //should return to default implementation
 }
 
 
