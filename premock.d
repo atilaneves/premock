@@ -47,15 +47,10 @@ private:
 }
 
 private T toDelegate(T, alias F)() {
-    static if(!isDelegate!F) {
-        int i; //just so it's captured
-        mixin(q{ return cast(T) } ~ typeAndArgsParens!(Parameters!T) ~ "{\n" ~
-              q{ ++i; } ~
-              "return F" ~ argNamesParens(Parameters!T.length) ~ ";\n" ~
-              "};");
-
-    } else
-        return cast(T)F;
+    static if(isDelegate!F)
+        return F;
+    else
+        return (Parameters!T values) => F(values);
 }
 
 
@@ -80,16 +75,11 @@ mixin template replace(string func, alias F, string varName = "_") {
     assert(mock_foo(7, "foo") == 10);
 }
 
-private U toDelegate(U, T)(T f) {
-    static if(!isDelegate!T) {
-        int i; //just so it's captured
-        mixin(q{ return cast(U) } ~ typeAndArgsParens!(Parameters!T) ~ "{\n" ~
-              q{ ++i; } ~
-              "return f" ~ argNamesParens(Parameters!T.length) ~ ";\n" ~
-              "};");
-
-    } else
-        return cast(U)f;
+private T toDelegate(T, F)(F f) {
+    static if(isDelegate!F)
+        return f;
+    else
+        return (Parameters!T values) => f(values);
 }
 
 string mockName(in string func) {
