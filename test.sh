@@ -2,4 +2,4 @@
 set -e
 ./ut_cpp
 ./example_cpp
-./example_d
+[[ $# -ne 0 ]] && ./example_d

@@ -1,4 +1,4 @@
-from reggae import object_files, link, Build, user_vars
+from reggae import object_files, link, Build, user_vars, optional
 
 
 san_opts = ""
@@ -54,4 +54,4 @@ ut_d = link(exe_name="example_d",
             flags="-L-lstdc++")
 
 
-build = Build(example_cpp, ut_cpp, ut_d)
+build = Build(example_cpp, ut_cpp, optional(ut_d))
