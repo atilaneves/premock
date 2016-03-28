@@ -31,8 +31,7 @@ matrix:
         - CXX_COMPILER=clang++-3.7
 
 install:
-  - mkdir -p objs/example_test.objs/example/{test,deps,src}
-  - mkdir -p objs/ut.objs/tests
+  - ./mkdirs.sh
 
 script:
   - make CC=$CC_COMPILER CXX=$CXX_COMPILER
