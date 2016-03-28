@@ -11,7 +11,17 @@ version(unittest) {
     import core.exception;
 }
 
-struct MockScope(T) if(isDelegate!T) {
+
+struct MockScope(T, alias F) if(isDelegate!T) {
+    this(ref T oldFunc) {
+        _scope = RunMockScope!T(oldFunc, toDelegate!(T, F));
+    }
+
+private:
+    RunMockScope!T _scope;
+}
+
+struct RunMockScope(T) if(isDelegate!T) {
 
     this(U)(ref T oldFunc, U newFunc) {
         _oldFuncPtr = &oldFunc;
@@ -29,22 +39,6 @@ struct MockScope(T) if(isDelegate!T) {
     T _oldFunc;
 }
 
-struct NewMockScope(T, alias F) if(isDelegate!T) {
-    this(ref T oldFunc) {
-        _oldFuncPtr = &oldFunc;
-        _oldFunc = oldFunc;
-        oldFunc = toDelegate!(T, F);
-    }
-
-    ~this() {
-        *_oldFuncPtr = _oldFunc;
-    }
-
-private:
-
-    T* _oldFuncPtr;
-    T _oldFunc;
-}
 
 private T toDelegate(T, alias F)() {
     static if(isDelegate!F)
@@ -53,9 +47,16 @@ private T toDelegate(T, alias F)() {
         return (Parameters!T values) => F(values);
 }
 
+private T toDelegate(T, F)(F f) {
+    static if(isDelegate!F)
+        return f;
+    else
+        return (Parameters!T values) => f(values);
+}
+
 
 auto mockScope(alias F, T)(ref T oldFunc) {
-    auto m = NewMockScope!(T, F)(oldFunc);
+    auto m = MockScope!(T, F)(oldFunc);
     return m;
 }
 
@@ -75,12 +76,6 @@ mixin template replace(string func, alias F, string varName = "_") {
     assert(mock_foo(7, "foo") == 10);
 }
 
-private T toDelegate(T, F)(F f) {
-    static if(isDelegate!F)
-        return f;
-    else
-        return (Parameters!T values) => f(values);
-}
 
 string mockName(in string func) {
     return "mock_" ~ func;
@@ -117,7 +112,7 @@ struct Mock(T) {
             if(_returns.length > 1) _returns.popFront;
             return ret;
         }
-        _scope = MockScope!(T)(func, &inner);
+        _scope = RunMockScope!(T)(func, &inner);
     }
 
     void returnValue(V...)(V value) {
@@ -163,7 +158,7 @@ struct Mock(T) {
 
 private:
 
-    MockScope!T _scope;
+    RunMockScope!T _scope;
     ReturnType!T[] _returns;
     Tuple!(Parameters!T)[] _values;
 
