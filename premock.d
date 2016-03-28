@@ -298,17 +298,24 @@ version(unittest) {
 }
 
 
-mixin template ImplMock(string func, R, T...) {
-    mixin(q{ extern(C) R } ~ func ~ q{ (T); });
+mixin template ImplCMock(string func, R, T...) {
+    mixin(`pragma(mangle, "` ~ func ~ `")` ~ q{extern(C) R } ~ func ~ q{ (T); });
+    mixin(q{R delegate(T) mock_} ~ func ~ ";"); //declare the mock
+    static this() {
+        mixin(`mock_` ~ func ~ ` = ` ~ argNamesParens(T.length) ~ ` => ` ~ func ~ argNamesParens(T.length) ~ ";");
+    }
+    mixin(`pragma(mangle, "ut_` ~ func ~ `")` ~ q{ extern(C) R ut_} ~ func ~ typeAndArgsParens!T ~ " { " ~
+          q{ return mock_} ~ func ~ argNamesParens(T.length) ~ ";" ~
+          `}`);
 }
 
-string implMockStr(string lang, string func, R, T...)() {
-    return "extern(" ~ lang ~ ")" ~ R.stringof ~ " " ~ func ~ T.stringof ~ ";" ~ "\n" ~
+string implCppMockStr(string func, R, T...)() {
+    return "extern(C++)" ~ R.stringof ~ " " ~ func ~ T.stringof ~ ";" ~ "\n" ~
                             R.stringof ~ " delegate" ~ T.stringof ~ " mock_" ~ func ~ ";" ~ "\n" ~
                             `static this() { ` ~ "\n" ~
                             `    mock_` ~ func ~ ` = ` ~ argNamesParens(T.length) ~ ` => ` ~ func ~ argNamesParens(T.length) ~ ";\n" ~
                             "}\n" ~
-                              "extern(" ~ lang ~ ") " ~ R.stringof ~ " ut_" ~ func ~ typeAndArgsParens!T ~ " {\n" ~
+                              "extern(C++) " ~ R.stringof ~ " ut_" ~ func ~ typeAndArgsParens!T ~ " {\n" ~
                             "    return mock_" ~ func ~ argNamesParens(T.length) ~ ";\n" ~
                             "}";
 
