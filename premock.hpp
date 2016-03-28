@@ -43,9 +43,7 @@ following contents:
 DECL_MOCK(send); // the declaration for the implementation in the cpp file
 ```
 
-In this example, `PREMOCK_ENABLE` should not be defined for the
-`mock_*.cpp` files so they have access to the "real" `send`.  Now
-test code can do this:
+Now test code can do this:
 
 ```c++
 #include "mock_network.hpp"
@@ -62,7 +60,12 @@ TEST(send, mock) {
     // any function that calls send from here until the end of scope
     // will get a return value of 42
     function_that_calls_send();
-    m.expectCalled().withValues(3, nullptr, 0, 0);
+    // check last call to send only
+    m.expectCalled().withValues(3, nullptr, 0, 0); //checks values of last call
+    // check last 3 calls:
+    m.expectCalled(3).withValues({make_tuple(3, nullptr, 0, 0),
+                                  make_tuple(5, nullptr, 0, 0),
+                                  make_tuple(7, nullptr, 0, 0)});
 }
 
 TEST(send, for_reals) {
