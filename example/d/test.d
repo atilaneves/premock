@@ -3,7 +3,7 @@ import mocks;
 import std.stdio;
 import std.conv;
 import std.typecons;
-
+import core.exception;
 
 extern(C) {
     long prod_send(int);
@@ -38,30 +38,30 @@ void main() {
         m.expectCalled().withValues(3, cast(const(void)*)null, 0UL, 0);
     }
 
-    // {
-    //     immutable ret = 3;
-    //     replace(mock_other_zero, { return ret; });
-    //     assertEqual(prod_zero(), ret);
-    // }
+    {
+        immutable ret = 3;
+        auto _ = replace(mock_other_zero, { return ret; });
+        assertEqual(prod_zero(), ret);
+    }
 
-    // {
-    //     replace(mock_other_one, (int i) { return 4 * i; });
-    //     assertEqual(prod_one(8), 36);
-    // }
-    // {
-    //     replace(mock_other_two, (int i, int j) { return i + j + 1; });
-    //     assertEqual(prod_two(3, 4), 8);
-    // }
-    // {
-    //     replace(mock_other_three, (double, int j, const char*) {
-    //         assert(j != 2);
-    //     });
-    //     prod_three(0, 1, null);
-    //     try {
-    //         prod_three(0, 0, null); //should throw
-    //         assert(0); //should never get here
-    //     } catch(Exception ex) { }
-    // }
+    {
+        auto _ = replace(mock_other_one, (int i) { return 4 * i; });
+        assertEqual(prod_one(8), 36);
+    }
+    {
+        auto _ = replace(mock_other_two, (int i, int j) { return i + j + 1; });
+        assertEqual(prod_two(3, 4), 8);
+    }
+    {
+        auto _ = replace(mock_other_three, (double, int j, const char*) {
+            assert(j != 2);
+        });
+        prod_three(0, 1, null);
+        try {
+            prod_three(0, 0, null); //should throw
+            assert(0); //should never get here
+        } catch(AssertError ex) { }
+    }
 
     {
         mixin mock!"other_two";

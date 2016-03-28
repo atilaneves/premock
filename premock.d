@@ -29,6 +29,53 @@ struct MockScope(T) if(isDelegate!T) {
     T _oldFunc;
 }
 
+struct NewMockScope(T, alias F) if(isDelegate!T) {
+    this(ref T oldFunc) {
+        _oldFuncPtr = &oldFunc;
+        _oldFunc = oldFunc;
+        oldFunc = newtoDelegate!(T, F);
+    }
+
+    ~this() {
+        *_oldFuncPtr = _oldFunc;
+    }
+
+private:
+
+    T* _oldFuncPtr;
+    T _oldFunc;
+}
+
+private T newtoDelegate(T, alias F)() {
+    static if(!isDelegate!F) {
+        int i; //just so it's captured
+        mixin(q{ return cast(T) } ~ typeAndArgsParens!(Parameters!T) ~ "{\n" ~
+              q{ ++i; } ~
+              "return F" ~ argNamesParens(Parameters!T.length) ~ ";\n" ~
+              "};");
+
+    } else
+        return cast(U)f;
+}
+
+
+auto mockScope(alias F, T)(ref T oldFunc) {
+    auto m = NewMockScope!(T, F)(oldFunc);
+    return m;
+}
+
+@("MockScope ctor/dtor") unittest {
+    int delegate(int, string) mock_foo = (i, s) => i + cast(int)s.length;
+    assert(mock_foo(7, "foo") == 10);
+
+    {
+        auto _ = mockScope!((i, s) => i + 1 - cast(int)s.length)(mock_foo);
+        assert(mock_foo(7, "foo") == 5, mock_foo(7, "foo").to!string);
+    }
+
+    assert(mock_foo(7, "foo") == 10);
+}
+
 private U toDelegate(U, T)(T f) {
     static if(!isDelegate!T) {
         int i; //just so it's captured
@@ -42,7 +89,8 @@ private U toDelegate(U, T)(T f) {
 }
 
 auto replace(T, U)(ref T oldFunc, U newFunc) {
-    return MockScope!T(oldFunc, newFunc);
+    auto m = MockScope!T(oldFunc, newFunc);
+    return m;
 }
 
 string mockName(in string func) {
