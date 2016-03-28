@@ -1,4 +1,5 @@
 #!/bin/bash
 set -e
-./ut
-./example_test
+./ut_cpp
+./example_cpp
+[[ $# -ne 0 ]] && ./example_d
