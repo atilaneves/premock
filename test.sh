@@ -2,4 +2,6 @@
 set -e
 ./ut_cpp
 ./example_cpp
-[[ $# -ne 0 ]] && ./example_d
+if [[ $# -ne 0 ]]; then
+    ./example_d
+fi
