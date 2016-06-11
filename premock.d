@@ -103,16 +103,19 @@ struct Mock(T) {
     this(ref T func) {
         import std.array;
 
-        _returns = [ReturnType!T.init];
+        static if(!is(ReturnType!T == void))
+            _returns = [ReturnType!T.init];
 
         ReturnType!T inner(Parameters!T values) {
             _values ~= tuple(values);
 
             setOutputParameters(values);
 
-            auto ret = _returns[0];
-            if(_returns.length > 1) _returns.popFront;
-            return ret;
+            static if(!is(ReturnType!T == void)) {
+                auto ret = _returns[0];
+                if(_returns.length > 1) _returns.popFront;
+                return ret;
+            }
         }
         _scope = RunMockScope!(T)(func, &inner);
     }
@@ -123,6 +126,7 @@ struct Mock(T) {
     }
 
     auto expectCalled(int n = 1, string file = __FILE__, ulong line = cast(ulong)__LINE__) {
+
         struct ParamCheck {
 
             Tuple!(Parameters!T)[] _values;
@@ -344,6 +348,15 @@ version(unittest) {
     m.outputParam!(1)(&val);
     assert(returnDoubleInt(5) == 42);
     m.expectCalled;
+}
+
+@("void return type for mock") unittest {
+
+    void delegate(int input) mock_func;
+    void callDoubleInt(int i) { mock_func(i * 2); }
+    mixin mock!"func";
+    callDoubleInt(5);
+    m.expectCalled.withValues(10);
 }
 
 mixin template ImplCMock(string func, R, T...) {
