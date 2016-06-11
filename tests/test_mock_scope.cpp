@@ -197,9 +197,24 @@ static const char* returnString() {
     return buf;
 }
 
+static function<bool(int*)> mock_output_int;
+static int returnDoubleInt() {
+    static int i;
+    mock_output_int(&i);
+    return i * 2;
+}
+
+
 TEST_CASE("output c string") {
     auto m = MOCK(output_string);
     char buf[] = "foobar";
     m.outputArray<0>(buf, strlen(buf) + 1);
     REQUIRE(returnString() == "foobar"s);
+}
+
+TEST_CASE("output int") {
+    auto m = MOCK(output_int);
+    int val{21};
+    m.outputArray<0>(&val, 1);
+    REQUIRE(returnDoubleInt() == 42);
 }

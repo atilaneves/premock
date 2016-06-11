@@ -344,10 +344,6 @@ public:
     template<size_t I, typename A>
     void outputArray(A ptr, size_t length) {
         std::get<I>(_outputs) = Slice<A>{ptr, length};
-        //std::copy(ptr, ptr + length, std::back_inserter(std::get<I>(_outputs)));
-        // std::get<I>(_outputs).push_back('c');
-        // std::get<I>(_outputs).push_back(0);
-
     }
 
     /**
@@ -384,7 +380,9 @@ private:
     std::enable_if_t<std::is_pointer<A>::value> setOutputParameters(A outputParam, As&&... ) {
         constexpr auto paramIndex = std::tuple_size<decltype(_outputs)>::value - N;
         const auto& data = std::get<paramIndex>(_outputs);
-        memcpy(outputParam, data.ptr, data.length);
+        if(data.ptr && data.length) {
+            memcpy(outputParam, data.ptr, data.length);
+        }
     }
 
     template<int N, typename A, typename... As>
