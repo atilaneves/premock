@@ -20,7 +20,6 @@ std::ostream& operator<<(std::ostream& stream, const Foo& foo) {
     return stream;
 }
 
-
 void useStream() {
     // just so operator<< above is used by someone and the compiler stops complaining
     std::cout << Foo{1};
@@ -189,4 +188,44 @@ TEST_CASE("Right exception message when invocation values don't match for unstre
                 "Expected: (<cannot print>)\n" +
                 "Actual:   (<cannot print>)\n");
     }
+}
+
+static function<bool(char* output)> mock_output_string;
+static const char* returnString() {
+    static char buf[200] = "deadbeef";
+    mock_output_string(buf);
+    return buf;
+}
+
+
+TEST_CASE("output c string") {
+    auto m = MOCK(output_string);
+    char buf[] = "foobar";
+    m.outputArray<0>(buf, strlen(buf) + 1);
+    REQUIRE(returnString() == "foobar"s);
+}
+
+static function<bool(int, int*)> mock_output_int;
+static int returnDoubleInt(int i) {
+    static int o = 11223344;
+    mock_output_int(i, &o);
+    return o * 2;
+}
+
+TEST_CASE("output int") {
+    auto m = MOCK(output_int);
+    int val{21};
+    m.outputParam<1>(&val);
+    REQUIRE(returnDoubleInt(5) == 42);
+    m.expectCalled();//.withValues(5, nullptr);
+}
+
+
+static function<void(int)> mock_void_return;
+static void callDoubleInt(int i) { mock_void_return(i * 2); }
+
+TEST_CASE("void return") {
+    auto m = MOCK(void_return);
+    callDoubleInt(5);
+    m.expectCalled().withValues(10);
 }

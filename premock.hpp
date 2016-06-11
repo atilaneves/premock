@@ -88,9 +88,11 @@ will be used.
 #include <type_traits>
 #include <tuple>
 #include <deque>
+#include <vector>
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
+#include <cstring>
 
 /**
  RAII class for setting a mock to a callable until the end of scope
@@ -112,7 +114,6 @@ public:
 
         _func = std::move(scopeFunc);
     }
-
 
     /**
      Restore func to its original value
@@ -147,6 +148,13 @@ MockScope<T> mockScope(T& func, F scopeFunc) {
  */
 #define REPLACE(func, lambda) auto _ = mockScope(mock_##func, lambda)
 
+template<typename T>
+struct Slice {
+    void* ptr = nullptr;
+    size_t length = 0;
+};
+
+
 template<typename>
 struct StdFunctionTraits {};
 
@@ -156,6 +164,7 @@ struct StdFunctionTraits {};
 template<typename R, typename... A>
 struct StdFunctionTraits<std::function<R(A...)>> {
     using TupleType = std::tuple<std::remove_reference_t<A>...>;
+    using OutputTupleType = std::tuple<Slice<std::remove_reference_t<A>> ...>;
 };
 
 
@@ -228,6 +237,16 @@ std::string toString(const std::tuple<A...>& values) {
 }
 
 
+// primary template, default to false for every type
+template<typename, typename = std::void_t<>>
+struct CanBeOverwritten: std::false_type {};
+
+// detects when ostream operator<< works on a type
+template<typename T>
+struct CanBeOverwritten<T, std::void_t<decltype(memcpy(std::declval<T>(), nullptr, 0))>>: std::true_type {};
+
+
+
 /**
  A mock class to verify expectations of how the mock was called.
  Supports verification of the number of times called, setting
@@ -238,7 +257,8 @@ class Mock {
 public:
 
     using ReturnType = typename MockScope<T>::ReturnType;
-    using TupleType = typename StdFunctionTraits<T>::TupleType;
+    using ParamTupleType = typename StdFunctionTraits<T>::TupleType;
+    using OutputTupleType = typename StdFunctionTraits<T>::OutputTupleType;
 
     /**
      Enables checks on parameter values passed to function invocations
@@ -246,7 +266,7 @@ public:
     class ParamChecker {
     public:
 
-        ParamChecker(std::deque<TupleType> v):_values{v} {}
+        ParamChecker(std::deque<ParamTupleType> v):_values{v} {}
 
         /**
          Verifies the parameter values passed in the last invocation
@@ -261,11 +281,11 @@ public:
          call to `expectCalled`, optionally between the start-th and end-th
          invocations
          */
-        void withValues(std::initializer_list<TupleType> args,
+        void withValues(std::initializer_list<ParamTupleType> args,
                         size_t start = 0, size_t end = 0) {
 
             if(end == 0) end = _values.size();
-            std::deque<TupleType> expected{std::move(args)};
+            std::deque<ParamTupleType> expected{std::move(args)};
 
             const auto expectedArgsSize = end - start;
             if(expected.size() != expectedArgsSize)
@@ -285,7 +305,7 @@ public:
 
     private:
 
-        std::deque<TupleType> _values;
+        std::deque<ParamTupleType> _values;
         std::string capitalize(int val, const std::string& word) {
             return val == 1 ? "1 " + word : std::to_string(val) + " " + word + "s";
         }
@@ -298,10 +318,18 @@ public:
     Mock(T& func):
         _mockScope{func,
             [this](auto... args) {
+
                 _values.emplace_back(args...);
+
+                setOutputParameters<sizeof...(args)>(args...);
+
                 auto ret = _returns.at(0);
                 if(_returns.size() > 1) _returns.pop_front();
-                return ret;
+
+                // it may seem odd to cast to the return type here, but the only
+                // reason it's needed is when the mocked function's return type
+                // is void. This makes it work
+                return static_cast<ReturnType>(ret);
         }},
     _returns(1) {
 
@@ -314,6 +342,19 @@ public:
     void returnValue(A&&... args) {
         _returns.clear();
         returnValueImpl(std::forward<A>(args)...);
+    }
+
+    /**
+     Set the output parameter at position I
+    */
+    template<int I, typename A>
+    void outputParam(A valuePtr) {
+        outputArray<I>(valuePtr, 1);
+    }
+
+    template<size_t I, typename A>
+    void outputArray(A ptr, size_t length) {
+        std::get<I>(_outputs) = Slice<A>{ptr, length * sizeof(*ptr)};
     }
 
     /**
@@ -334,8 +375,11 @@ public:
 private:
 
     MockScope<T> _mockScope;
-    std::deque<ReturnType> _returns;
-    std::deque<TupleType> _values;
+    // the _returns would be static if'ed out for void return type if it were allowed in C++
+    // since it isn't, we change the return type to void* in that case
+    std::deque<std::conditional_t<std::is_void<ReturnType>::value, void*, ReturnType>> _returns;
+    std::deque<ParamTupleType> _values;
+    OutputTupleType _outputs{};
 
     template<typename A, typename... As>
     void returnValueImpl(A&& arg, As&&... args) {
@@ -344,7 +388,42 @@ private:
     }
 
     void returnValueImpl() {}
+
+
+    template<int N, typename A, typename... As>
+    std::enable_if_t<std::is_pointer<std::remove_reference_t<A>>::value && CanBeOverwritten<A>::value>
+    setOutputParameters(A outputParam, As&&... args) {
+        setOutputParametersImpl<N>(std::forward<A>(outputParam));
+        setOutputParameters<N - 1>(std::forward<As>(args)...);
+    }
+
+    template<int N, typename A>
+    std::enable_if_t<std::is_pointer<std::remove_reference_t<A>>::value && CanBeOverwritten<A>::value>
+    setOutputParameters(A&& outputParam) {
+        setOutputParametersImpl<N>(std::forward<A>(outputParam));
+    }
+
+    template<int N, typename A>
+    void setOutputParametersImpl(A outputParam) {
+        constexpr auto paramIndex = std::tuple_size<decltype(_outputs)>::value - N;
+        const auto& data = std::get<paramIndex>(_outputs);
+        if(data.ptr && data.length) {
+            memcpy(outputParam, data.ptr, data.length);
+        }
+    }
+
+
+    template<int N, typename A, typename... As>
+    std::enable_if_t<!std::is_pointer<std::remove_reference_t<A>>::value || !CanBeOverwritten<A>::value>
+    setOutputParameters(A, As&&... args) {
+        setOutputParameters<N - 1>(std::forward<As>(args)...);
+    }
+
+    template<int N, typename A>
+    std::enable_if_t<!std::is_pointer<std::remove_reference_t<A>>::value || !CanBeOverwritten<A>::value>
+    setOutputParameters(A) { }
 };
+
 
 /**
  Helper function to create a Mock<T>
