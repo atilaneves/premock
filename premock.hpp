@@ -151,8 +151,8 @@ MockScope<T> mockScope(T& func, F scopeFunc) {
 
 template<typename T>
 struct Slice {
-    void* ptr;
-    size_t length;
+    void* ptr = nullptr;
+    size_t length = 0;
 };
 
 
@@ -237,6 +237,16 @@ template<typename... A>
 std::string toString(const std::tuple<A...>& values) {
     return std::string{"("} + TuplePrinter<sizeof...(A)>::toString(values) + ")";
 }
+
+
+// primary template, default to false for every type
+template<typename, typename = std::void_t<>>
+struct CanBeOverwritten: std::false_type {};
+
+// detects when ostream operator<< works on a type
+template<typename T>
+struct CanBeOverwritten<T, std::void_t<decltype(memcpy(std::declval<T>(), nullptr, 0))>>: std::true_type {};
+
 
 
 /**
@@ -343,7 +353,7 @@ public:
 
     template<size_t I, typename A>
     void outputArray(A ptr, size_t length) {
-        std::get<I>(_outputs) = Slice<A>{ptr, length};
+        std::get<I>(_outputs) = Slice<A>{ptr, length * sizeof(*ptr)};
     }
 
     /**
@@ -366,7 +376,7 @@ private:
     MockScope<T> _mockScope;
     std::deque<ReturnType> _returns;
     std::deque<ParamTupleType> _values;
-    OutputTupleType _outputs;
+    OutputTupleType _outputs{};
 
     template<typename A, typename... As>
     void returnValueImpl(A&& arg, As&&... args) {
@@ -376,8 +386,21 @@ private:
 
     void returnValueImpl() {}
 
+
     template<int N, typename A, typename... As>
-    std::enable_if_t<std::is_pointer<A>::value> setOutputParameters(A outputParam, As&&... ) {
+    std::enable_if_t<std::is_pointer<std::remove_reference_t<A>>::value && CanBeOverwritten<A>::value>
+    setOutputParameters(A outputParam, As&&... args) {
+        constexpr auto paramIndex = std::tuple_size<decltype(_outputs)>::value - N;
+        const auto& data = std::get<paramIndex>(_outputs);
+        if(data.ptr && data.length) {
+            memcpy(outputParam, data.ptr, data.length);
+        }
+        setOutputParameters<N - 1>(std::forward<As>(args)...);
+    }
+
+    template<int N, typename A>
+    std::enable_if_t<std::is_pointer<std::remove_reference_t<A>>::value && CanBeOverwritten<A>::value>
+    setOutputParameters(A outputParam) {
         constexpr auto paramIndex = std::tuple_size<decltype(_outputs)>::value - N;
         const auto& data = std::get<paramIndex>(_outputs);
         if(data.ptr && data.length) {
@@ -385,9 +408,16 @@ private:
         }
     }
 
-    template<int N, typename A, typename... As>
-    std::enable_if_t<!std::is_pointer<A>::value> setOutputParameters(A, As&&... ) { }
 
+    template<int N, typename A, typename... As>
+    std::enable_if_t<!std::is_pointer<std::remove_reference_t<A>>::value || !CanBeOverwritten<A>::value>
+    setOutputParameters(A, As&&... args) {
+        setOutputParameters<N - 1>(std::forward<As>(args)...);
+    }
+
+    template<int N, typename A>
+    std::enable_if_t<!std::is_pointer<std::remove_reference_t<A>>::value || !CanBeOverwritten<A>::value>
+    setOutputParameters(A) { }
 };
 
 
