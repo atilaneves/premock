@@ -216,7 +216,6 @@ TEST_CASE("output int") {
     auto m = MOCK(output_int);
     int val{21};
     m.outputParam<1>(&val);
-    cout << &val << endl;
     REQUIRE(returnDoubleInt(5) == 42);
     m.expectCalled();//.withValues(5, nullptr);
 }

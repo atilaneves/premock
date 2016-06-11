@@ -108,6 +108,8 @@ struct Mock(T) {
         ReturnType!T inner(Parameters!T values) {
             _values ~= tuple(values);
 
+            setOutputParameters(values);
+
             auto ret = _returns[0];
             if(_returns.length > 1) _returns.popFront;
             return ret;
@@ -156,11 +158,20 @@ struct Mock(T) {
         return ParamCheck(oldValues);
     }
 
+    void outputParam(int index, A)(A* ptr) {
+        outputArray!index(ptr, 1);
+    }
+
+    void outputArray(int index, A)(A* ptr, ulong length) {
+        _outputs[index] = cast(void[])(ptr[0 .. length * A.sizeof]);
+    }
+
 private:
 
     RunMockScope!T _scope;
     ReturnType!T[] _returns;
     Tuple!(Parameters!T)[] _values;
+    void[][Parameters!T.length] _outputs;
 
     static string capitalize(int val, string word) {
         return val == 1 ? "1 " ~ word : val.to!string ~ " " ~ word ~ "s";
@@ -170,7 +181,15 @@ private:
          throw new MockException(text("Invocation values do not match\n",
                                       "Expected: ", expected, "\n",
                                       "Actual:   ", actual, "\n"));
+    }
 
+    void setOutputParameters(A...)(A params) {
+        foreach(i, ref param; params) {
+            static if(isPointer!(typeof(param)) && !is(typeof(param) == const(V)*, V)) {
+                import core.stdc.string;
+                memcpy(param, _outputs[i].ptr, _outputs[i].length);
+            }
+        }
     }
 }
 
@@ -297,6 +316,35 @@ version(unittest) {
     }
 }
 
+@("output C string") unittest {
+    bool delegate(int input, char* output) mock_output_string;
+    string returnString(int i) {
+        static char buf[200] = "deadbeef";
+        mock_output_string(i, buf.ptr);
+        import std.string;
+        import std.conv: to;
+        return buf.ptr.fromStringz.to!string;
+    }
+
+    mixin mock!"output_string";
+    string buf = "foobar" ~ '\0';
+    m.outputArray!(1)(buf.ptr, buf.length + 1);
+    assert(returnString(5) == "foobar");
+}
+
+@("output int") unittest {
+    bool delegate(int input, int* output) mock_output_int;
+    int returnDoubleInt(int i) {
+        static int o = 11223344;
+        mock_output_int(i, &o);
+        return o * 2;
+    }
+    mixin mock!"output_int";
+    int val = 21;
+    m.outputParam!(1)(&val);
+    assert(returnDoubleInt(5) == 42);
+    m.expectCalled;
+}
 
 mixin template ImplCMock(string func, R, T...) {
     mixin(`pragma(mangle, "` ~ func ~ `")` ~ q{extern(C) R } ~ func ~ q{ (T); });
@@ -313,7 +361,8 @@ string implCppMockStr(string func, R, T...)() {
     return "extern(C++)" ~ R.stringof ~ " " ~ func ~ T.stringof ~ ";" ~ "\n" ~
                             R.stringof ~ " delegate" ~ T.stringof ~ " mock_" ~ func ~ ";" ~ "\n" ~
                             `static this() { ` ~ "\n" ~
-                            `    mock_` ~ func ~ ` = ` ~ argNamesParens(T.length) ~ ` => ` ~ func ~ argNamesParens(T.length) ~ ";\n" ~
+                            `    mock_` ~ func ~ ` = ` ~ argNamesParens(T.length) ~ ` => ` ~ func ~
+        argNamesParens(T.length) ~ ";\n" ~
                             "}\n" ~
                               "extern(C++) " ~ R.stringof ~ " ut_" ~ func ~ typeAndArgsParens!T ~ " {\n" ~
                             "    return mock_" ~ func ~ argNamesParens(T.length) ~ ";\n" ~
