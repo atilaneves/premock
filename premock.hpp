@@ -390,17 +390,18 @@ private:
     template<int N, typename A, typename... As>
     std::enable_if_t<std::is_pointer<std::remove_reference_t<A>>::value && CanBeOverwritten<A>::value>
     setOutputParameters(A outputParam, As&&... args) {
-        constexpr auto paramIndex = std::tuple_size<decltype(_outputs)>::value - N;
-        const auto& data = std::get<paramIndex>(_outputs);
-        if(data.ptr && data.length) {
-            memcpy(outputParam, data.ptr, data.length);
-        }
+        setOutputParametersImpl<N>(std::forward<A>(outputParam));
         setOutputParameters<N - 1>(std::forward<As>(args)...);
     }
 
     template<int N, typename A>
     std::enable_if_t<std::is_pointer<std::remove_reference_t<A>>::value && CanBeOverwritten<A>::value>
-    setOutputParameters(A outputParam) {
+    setOutputParameters(A&& outputParam) {
+        setOutputParametersImpl<N>(std::forward<A>(outputParam));
+    }
+
+    template<int N, typename A>
+    void setOutputParametersImpl(A outputParam) {
         constexpr auto paramIndex = std::tuple_size<decltype(_outputs)>::value - N;
         const auto& data = std::get<paramIndex>(_outputs);
         if(data.ptr && data.length) {
