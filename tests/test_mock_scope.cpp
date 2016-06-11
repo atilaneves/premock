@@ -215,6 +215,6 @@ TEST_CASE("output c string") {
 TEST_CASE("output int") {
     auto m = MOCK(output_int);
     int val{21};
-    m.outputArray<0>(&val, 1);
+    m.outputParam<0>(&val);
     REQUIRE(returnDoubleInt() == 42);
 }

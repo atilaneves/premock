@@ -336,10 +336,10 @@ public:
     /**
      Set the output parameter at position I
     */
-    // template<int I, typename A>
-    // void outputParam(A value) {
-    //     std::get<I>(_outputs) = &value;
-    // }
+    template<int I, typename A>
+    void outputParam(A valuePtr) {
+        outputArray<I>(valuePtr, 1);
+    }
 
     template<size_t I, typename A>
     void outputArray(A ptr, size_t length) {
