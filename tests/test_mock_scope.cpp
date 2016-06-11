@@ -219,3 +219,13 @@ TEST_CASE("output int") {
     REQUIRE(returnDoubleInt(5) == 42);
     m.expectCalled();//.withValues(5, nullptr);
 }
+
+
+static function<void(int)> mock_void_return;
+static void callDoubleInt(int i) { mock_void_return(i * 2); }
+
+TEST_CASE("void return") {
+    auto m = MOCK(void_return);
+    callDoubleInt(5);
+    m.expectCalled().withValues(10);
+}

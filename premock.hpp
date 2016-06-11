@@ -115,7 +115,6 @@ public:
         _func = std::move(scopeFunc);
     }
 
-
     /**
      Restore func to its original value
      */
@@ -165,7 +164,6 @@ struct StdFunctionTraits {};
 template<typename R, typename... A>
 struct StdFunctionTraits<std::function<R(A...)>> {
     using TupleType = std::tuple<std::remove_reference_t<A>...>;
-    using VectorsTupleType = std::tuple<std::vector<std::remove_const_t<std::remove_pointer_t<std::remove_reference_t<A > > > >...>;
     using OutputTupleType = std::tuple<Slice<std::remove_reference_t<A>> ...>;
 };
 
@@ -260,7 +258,6 @@ public:
 
     using ReturnType = typename MockScope<T>::ReturnType;
     using ParamTupleType = typename StdFunctionTraits<T>::TupleType;
-    //using ParamVectorTupleType = typename StdFunctionTraits<T>::VectorsTupleType;
     using OutputTupleType = typename StdFunctionTraits<T>::OutputTupleType;
 
     /**
@@ -328,7 +325,11 @@ public:
 
                 auto ret = _returns.at(0);
                 if(_returns.size() > 1) _returns.pop_front();
-                return ret;
+
+                // it may seem odd to cast to the return type here, but the only
+                // reason it's needed is when the mocked function's return type
+                // is void. This makes it work
+                return static_cast<ReturnType>(ret);
         }},
     _returns(1) {
 
@@ -374,7 +375,9 @@ public:
 private:
 
     MockScope<T> _mockScope;
-    std::deque<ReturnType> _returns;
+    // the _returns would be static if'ed out for void return type if it were allowed in C++
+    // since it isn't, we change the return type to void* in that case
+    std::deque<std::conditional_t<std::is_void<ReturnType>::value, void*, ReturnType>> _returns;
     std::deque<ParamTupleType> _values;
     OutputTupleType _outputs{};
 
