@@ -88,9 +88,11 @@ will be used.
 #include <type_traits>
 #include <tuple>
 #include <deque>
+#include <vector>
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
+#include <cstring>
 
 /**
  RAII class for setting a mock to a callable until the end of scope
@@ -147,6 +149,13 @@ MockScope<T> mockScope(T& func, F scopeFunc) {
  */
 #define REPLACE(func, lambda) auto _ = mockScope(mock_##func, lambda)
 
+template<typename T>
+struct Slice {
+    void* ptr;
+    size_t length;
+};
+
+
 template<typename>
 struct StdFunctionTraits {};
 
@@ -156,6 +165,8 @@ struct StdFunctionTraits {};
 template<typename R, typename... A>
 struct StdFunctionTraits<std::function<R(A...)>> {
     using TupleType = std::tuple<std::remove_reference_t<A>...>;
+    using VectorsTupleType = std::tuple<std::vector<std::remove_const_t<std::remove_pointer_t<std::remove_reference_t<A > > > >...>;
+    using OutputTupleType = std::tuple<Slice<std::remove_reference_t<A>> ...>;
 };
 
 
@@ -238,7 +249,9 @@ class Mock {
 public:
 
     using ReturnType = typename MockScope<T>::ReturnType;
-    using TupleType = typename StdFunctionTraits<T>::TupleType;
+    using ParamTupleType = typename StdFunctionTraits<T>::TupleType;
+    //using ParamVectorTupleType = typename StdFunctionTraits<T>::VectorsTupleType;
+    using OutputTupleType = typename StdFunctionTraits<T>::OutputTupleType;
 
     /**
      Enables checks on parameter values passed to function invocations
@@ -246,7 +259,7 @@ public:
     class ParamChecker {
     public:
 
-        ParamChecker(std::deque<TupleType> v):_values{v} {}
+        ParamChecker(std::deque<ParamTupleType> v):_values{v} {}
 
         /**
          Verifies the parameter values passed in the last invocation
@@ -261,11 +274,11 @@ public:
          call to `expectCalled`, optionally between the start-th and end-th
          invocations
          */
-        void withValues(std::initializer_list<TupleType> args,
+        void withValues(std::initializer_list<ParamTupleType> args,
                         size_t start = 0, size_t end = 0) {
 
             if(end == 0) end = _values.size();
-            std::deque<TupleType> expected{std::move(args)};
+            std::deque<ParamTupleType> expected{std::move(args)};
 
             const auto expectedArgsSize = end - start;
             if(expected.size() != expectedArgsSize)
@@ -285,7 +298,7 @@ public:
 
     private:
 
-        std::deque<TupleType> _values;
+        std::deque<ParamTupleType> _values;
         std::string capitalize(int val, const std::string& word) {
             return val == 1 ? "1 " + word : std::to_string(val) + " " + word + "s";
         }
@@ -298,7 +311,11 @@ public:
     Mock(T& func):
         _mockScope{func,
             [this](auto... args) {
+
                 _values.emplace_back(args...);
+
+                setOutputParameters<sizeof...(args)>(args...);
+
                 auto ret = _returns.at(0);
                 if(_returns.size() > 1) _returns.pop_front();
                 return ret;
@@ -314,6 +331,23 @@ public:
     void returnValue(A&&... args) {
         _returns.clear();
         returnValueImpl(std::forward<A>(args)...);
+    }
+
+    /**
+     Set the output parameter at position I
+    */
+    // template<int I, typename A>
+    // void outputParam(A value) {
+    //     std::get<I>(_outputs) = &value;
+    // }
+
+    template<size_t I, typename A>
+    void outputArray(A ptr, size_t length) {
+        std::get<I>(_outputs) = Slice<A>{ptr, length};
+        //std::copy(ptr, ptr + length, std::back_inserter(std::get<I>(_outputs)));
+        // std::get<I>(_outputs).push_back('c');
+        // std::get<I>(_outputs).push_back(0);
+
     }
 
     /**
@@ -335,7 +369,8 @@ private:
 
     MockScope<T> _mockScope;
     std::deque<ReturnType> _returns;
-    std::deque<TupleType> _values;
+    std::deque<ParamTupleType> _values;
+    OutputTupleType _outputs;
 
     template<typename A, typename... As>
     void returnValueImpl(A&& arg, As&&... args) {
@@ -344,7 +379,19 @@ private:
     }
 
     void returnValueImpl() {}
+
+    template<int N, typename A, typename... As>
+    std::enable_if_t<std::is_pointer<A>::value> setOutputParameters(A outputParam, As&&... ) {
+        constexpr auto paramIndex = std::tuple_size<decltype(_outputs)>::value - N;
+        const auto& data = std::get<paramIndex>(_outputs);
+        memcpy(outputParam, data.ptr, data.length);
+    }
+
+    template<int N, typename A, typename... As>
+    std::enable_if_t<!std::is_pointer<A>::value> setOutputParameters(A, As&&... ) { }
+
 };
+
 
 /**
  Helper function to create a Mock<T>

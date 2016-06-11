@@ -20,7 +20,6 @@ std::ostream& operator<<(std::ostream& stream, const Foo& foo) {
     return stream;
 }
 
-
 void useStream() {
     // just so operator<< above is used by someone and the compiler stops complaining
     std::cout << Foo{1};
@@ -189,4 +188,18 @@ TEST_CASE("Right exception message when invocation values don't match for unstre
                 "Expected: (<cannot print>)\n" +
                 "Actual:   (<cannot print>)\n");
     }
+}
+
+static function<bool(char* output)> mock_output_string;
+static const char* returnString() {
+    static char buf[200] = "deadbeef";
+    mock_output_string(buf);
+    return buf;
+}
+
+TEST_CASE("output c string") {
+    auto m = MOCK(output_string);
+    char buf[] = "foobar";
+    m.outputArray<0>(buf, strlen(buf) + 1);
+    REQUIRE(returnString() == "foobar"s);
 }
