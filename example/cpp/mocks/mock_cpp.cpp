@@ -1,3 +1,3 @@
 #include "mock_cpp.hpp"
 
-IMPL_MOCK(1, twice);
+IMPL_MOCK_DEFAULT(1, twice);

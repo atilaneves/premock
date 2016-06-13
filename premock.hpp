@@ -479,16 +479,28 @@ struct FunctionTraits<R(*)(A...)> {
 #define DECL_MOCK(func) extern "C" thread_local FunctionTraits<decltype(&func)>::StdFunctionType mock_##func
 
 /**
- Definition of the std::function that will store the implementation.
- Defaults to the "real" function. e.g. given:
+ Definition of the std::function that will store the implementation. e.g. given:
 
  int foo(int, float);
 
  Then MOCK_STORAGE(foo) is:
 
+ std::function<int(int, float)> mock_foo;
+ */
+#define MOCK_STORAGE(func) thread_local decltype(mock_##func) mock_##func
+
+
+/**
+ Definition of the std::function that will store the implementation.
+ Defaults to the "real" function. e.g. given:
+
+ int foo(int, float);
+
+ Then MOCK_STORAGE_DEFAULT(foo) is:
+
  std::function<int(int, float)> mock_foo = foo;
  */
-#define MOCK_STORAGE(func) thread_local decltype(mock_##func) mock_##func = func
+#define MOCK_STORAGE_DEFAULT(func) thread_local decltype(mock_##func) mock_##func = func
 
 /**
  A name for the ut_ function argument at position index
@@ -551,7 +563,41 @@ struct FunctionTraits<R(*)(A...)> {
 
 
 /**
- The implementation of the C++ mock for function func.
+ The implementation of the C++ mock for function func. This version makes the mock
+ function default to the real implementation.
+
+ This writes code to:
+
+ 1. Define the global mock_func std::function variable to hold the current implementation
+ 2. Assign this global to a pointer to the "real" implementation
+ 3. Writes the ut_ function called by production code to automatically forward to the mock
+
+ The number of arguments that the function takes must be specified. This could be deduced
+ with template metaprogramming but there is no way to feed that information back to
+ the preprocessor. Since the production calling code thinks it's calling a function
+ whose name begins with ut_, that function must exist or there'll be a linker error.
+ The only way to not have to write the function by hand is to use the preprocessor.
+
+ An example of a call to IMPL_MOCK(4, send) (where send is the BSD socket function)
+ assuming the macro is used in an extern "C" block:
+
+ extern "C" ssize_t ut_send(int arg0, const void* arg1, size_t arg2, int arg3) {
+     return mock_send(arg0, arg1, arg2, arg3);
+ }
+ std::function<ssize_t(int, const void*, size_t, int)> mock_send = send
+
+
+ */
+#define IMPL_MOCK_DEFAULT(num_args, func) \
+    FunctionTraits<decltype(&func)>::ReturnType ut_##func(UT_FUNC_ARGS_##num_args(func)) { \
+        return mock_##func(UT_FUNC_FWD_##num_args); \
+    } \
+    MOCK_STORAGE_DEFAULT(func)
+
+/**
+ The implementation of the C++ mock for function func. This version makes the mock
+ function default to nullptr.
+
  This writes code to:
 
  1. Define the global mock_func std::function variable to hold the current implementation

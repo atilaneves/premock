@@ -359,16 +359,30 @@ version(unittest) {
     m.expectCalled.withValues(10);
 }
 
-mixin template ImplCMock(string func, R, T...) {
+private mixin template DeclareMock(string func, R, T...) {
     mixin(`pragma(mangle, "` ~ func ~ `")` ~ q{extern(C) R } ~ func ~ q{ (T); });
     mixin(q{R delegate(T) mock_} ~ func ~ ";"); //declare the mock
-    static this() {
-        mixin(`mock_` ~ func ~ ` = ` ~ argNamesParens(T.length) ~ ` => ` ~ func ~ argNamesParens(T.length) ~ ";");
-    }
+}
+
+private mixin template ImplementUtFunc(string func, R, T...) {
     mixin(`pragma(mangle, "ut_` ~ func ~ `")` ~ q{ extern(C) R ut_} ~ func ~ typeAndArgsParens!T ~ " { " ~
           q{ return mock_} ~ func ~ argNamesParens(T.length) ~ ";" ~
           `}`);
 }
+
+mixin template ImplCMock(string func, R, T...) {
+    mixin DeclareMock!(func, R, T);
+    mixin ImplementUtFunc!(func, R, T);
+}
+
+mixin template ImplCMockDefault(string func, R, T...) {
+    mixin DeclareMock!(func, R, T);
+    static this() {
+        mixin(`mock_` ~ func ~ ` = ` ~ argNamesParens(T.length) ~ ` => ` ~ func ~ argNamesParens(T.length) ~ ";");
+    }
+    mixin ImplementUtFunc!(func, R, T);
+}
+
 
 string implCppMockStr(string func, R, T...)() {
     return "extern(C++)" ~ R.stringof ~ " " ~ func ~ T.stringof ~ ";" ~ "\n" ~
