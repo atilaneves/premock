@@ -7,3 +7,6 @@ __pycache__
 *.dep.P
 .tup
 .reggae
+.dir-locals.el
+compile_commands.json
+objs
