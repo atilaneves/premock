@@ -243,7 +243,7 @@ struct CanBeOverwritten: std::false_type {};
 
 // detects when ostream operator<< works on a type
 template<typename T>
-struct CanBeOverwritten<T, std::void_t<decltype(memcpy(std::declval<T>(), nullptr, 0))>>: std::true_type {};
+struct CanBeOverwritten<T, std::void_t<decltype(memcpy(std::declval<T>(), std::declval<T>(), 0))>>: std::true_type {};
 
 
 
@@ -321,7 +321,7 @@ public:
 
                 _values.emplace_back(args...);
 
-                setOutputParameters<sizeof...(args)>(args...);
+                this->setOutputParameters<sizeof...(args)>(args...);
 
                 auto ret = _returns.at(0);
                 if(_returns.size() > 1) _returns.pop_front();
@@ -372,6 +372,13 @@ public:
         return ret;
     }
 
+    template<int N, typename A, typename... As>
+    std::enable_if_t<std::is_pointer<std::remove_reference_t<A>>::value && CanBeOverwritten<A>::value>
+    setOutputParameters(A outputParam, As&&... args) {
+        setOutputParametersImpl<N>(std::forward<A>(outputParam));
+        setOutputParameters<N - 1>(std::forward<As>(args)...);
+    }
+
 private:
 
     MockScope<T> _mockScope;
@@ -388,14 +395,6 @@ private:
     }
 
     void returnValueImpl() {}
-
-
-    template<int N, typename A, typename... As>
-    std::enable_if_t<std::is_pointer<std::remove_reference_t<A>>::value && CanBeOverwritten<A>::value>
-    setOutputParameters(A outputParam, As&&... args) {
-        setOutputParametersImpl<N>(std::forward<A>(outputParam));
-        setOutputParameters<N - 1>(std::forward<As>(args)...);
-    }
 
     template<int N, typename A>
     std::enable_if_t<std::is_pointer<std::remove_reference_t<A>>::value && CanBeOverwritten<A>::value>
