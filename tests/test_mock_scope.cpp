@@ -4,12 +4,12 @@
 
 namespace {
 struct Foo {
-    Foo(int _i):i{_i} {}
+    explicit Foo(int _i):i{_i} {}
     int i;
     bool operator==(const Foo& other) const noexcept { return i == other.i; }
 };
 struct Bar {
-    Bar(int _i):i{_i} {}
+    explicit Bar(int _i):i{_i} {}
     int i;
     bool operator==(const Bar& other) const noexcept { return i == other.i; }
 };
