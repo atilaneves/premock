@@ -6,15 +6,15 @@ build objs/example_cpp.objs/example/cpp/test/test.o: _cppcompile example/cpp/tes
   flags = -Wall -Werror -Wextra -g -std=c++14
   DEPFILE = example/cpp/test/test.o.dep
 
-build objs/example_cpp.objs/example/src/cpp_prod.o: _cppcompile example/src/cpp_prod.cpp
-  includes = -I. -Iexample/cpp/test -Iexample/src -Iexample/deps -Iexample/cpp/mocks
-  flags = -Wall -Werror -Wextra -g -include mocks.h
-  DEPFILE = example/src/cpp_prod.o.dep
-
 build objs/example_cpp.objs/example/src/prod.o: _ccompile example/src/prod.c
   includes = -I. -Iexample/cpp/test -Iexample/src -Iexample/deps -Iexample/cpp/mocks
   flags = -Wall -Werror -Wextra -g -include mocks.h
   DEPFILE = example/src/prod.o.dep
+
+build objs/example_cpp.objs/example/src/cpp_prod.o: _cppcompile example/src/cpp_prod.cpp
+  includes = -I. -Iexample/cpp/test -Iexample/src -Iexample/deps -Iexample/cpp/mocks
+  flags = -Wall -Werror -Wextra -g -include mocks.h
+  DEPFILE = example/src/cpp_prod.o.dep
 
 build objs/example_cpp.objs/example/deps/other.o: _ccompile example/deps/other.c
   flags = -Wall -Werror -Wextra -g
@@ -24,79 +24,79 @@ build objs/example_cpp.objs/example/deps/cpp_other.o: _cppcompile example/deps/c
   flags = -Wall -Werror -Wextra -g
   DEPFILE = example/deps/cpp_other.o.dep
 
-build objs/example_cpp.objs/example/cpp/mocks/mock_network.o: _cppcompile example/cpp/mocks/mock_network.cpp
-  includes = -I. -Iexample/cpp/test -Iexample/src -Iexample/deps -Iexample/cpp/mocks
-  flags = -Wall -Werror -Wextra -g -std=c++14
-  DEPFILE = example/cpp/mocks/mock_network.o.dep
-
 build objs/example_cpp.objs/example/cpp/mocks/mock_other.o: _cppcompile example/cpp/mocks/mock_other.cpp
   includes = -I. -Iexample/cpp/test -Iexample/src -Iexample/deps -Iexample/cpp/mocks
   flags = -Wall -Werror -Wextra -g -std=c++14
   DEPFILE = example/cpp/mocks/mock_other.o.dep
+
+build objs/example_cpp.objs/example/cpp/mocks/mock_network.o: _cppcompile example/cpp/mocks/mock_network.cpp
+  includes = -I. -Iexample/cpp/test -Iexample/src -Iexample/deps -Iexample/cpp/mocks
+  flags = -Wall -Werror -Wextra -g -std=c++14
+  DEPFILE = example/cpp/mocks/mock_network.o.dep
 
 build objs/example_cpp.objs/example/cpp/mocks/mock_cpp.o: _cppcompile example/cpp/mocks/mock_cpp.cpp
   includes = -I. -Iexample/cpp/test -Iexample/src -Iexample/deps -Iexample/cpp/mocks
   flags = -Wall -Werror -Wextra -g -std=c++14
   DEPFILE = example/cpp/mocks/mock_cpp.o.dep
 
-build example_cpp: _cpplink objs/example_cpp.objs/example/cpp/test/test.o objs/example_cpp.objs/example/src/cpp_prod.o objs/example_cpp.objs/example/src/prod.o objs/example_cpp.objs/example/deps/other.o objs/example_cpp.objs/example/deps/cpp_other.o objs/example_cpp.objs/example/cpp/mocks/mock_network.o objs/example_cpp.objs/example/cpp/mocks/mock_other.o objs/example_cpp.objs/example/cpp/mocks/mock_cpp.o
-
-build objs/ut_cpp.objs/tests/main.o: _cppcompile tests/main.cpp
-  includes = -I. -Itests
-  flags = -Wall -Werror -Wextra -g -std=c++14
-  DEPFILE = tests/main.o.dep
-
-build objs/ut_cpp.objs/tests/test_mock_scope.o: _cppcompile tests/test_mock_scope.cpp
-  includes = -I. -Itests
-  flags = -Wall -Werror -Wextra -g -std=c++14
-  DEPFILE = tests/test_mock_scope.o.dep
-
-build objs/ut_cpp.objs/tests/test_traits.o: _cppcompile tests/test_traits.cpp
-  includes = -I. -Itests
-  flags = -Wall -Werror -Wextra -g -std=c++14
-  DEPFILE = tests/test_traits.o.dep
+build example_cpp: _cpplink objs/example_cpp.objs/example/cpp/test/test.o objs/example_cpp.objs/example/src/prod.o objs/example_cpp.objs/example/src/cpp_prod.o objs/example_cpp.objs/example/deps/other.o objs/example_cpp.objs/example/deps/cpp_other.o objs/example_cpp.objs/example/cpp/mocks/mock_other.o objs/example_cpp.objs/example/cpp/mocks/mock_network.o objs/example_cpp.objs/example/cpp/mocks/mock_cpp.o
 
 build objs/ut_cpp.objs/tests/test_exceptions.o: _cppcompile tests/test_exceptions.cpp
   includes = -I. -Itests
   flags = -Wall -Werror -Wextra -g -std=c++14
   DEPFILE = tests/test_exceptions.o.dep
 
-build ut_cpp: _cpplink objs/ut_cpp.objs/tests/main.o objs/ut_cpp.objs/tests/test_mock_scope.o objs/ut_cpp.objs/tests/test_traits.o objs/ut_cpp.objs/tests/test_exceptions.o
+build objs/ut_cpp.objs/tests/main.o: _cppcompile tests/main.cpp
+  includes = -I. -Itests
+  flags = -Wall -Werror -Wextra -g -std=c++14
+  DEPFILE = tests/main.o.dep
 
-build objs/example_d.objs/example/d/mock_other.o: _dcompile example/d/mock_other.d
-  includes = -I. -I. -Iexample/d
-  flags = -g -unittest
-  DEPFILE = example/d/mock_other.o.dep
+build objs/ut_cpp.objs/tests/test_traits.o: _cppcompile tests/test_traits.cpp
+  includes = -I. -Itests
+  flags = -Wall -Werror -Wextra -g -std=c++14
+  DEPFILE = tests/test_traits.o.dep
+
+build objs/ut_cpp.objs/tests/test_mock_scope.o: _cppcompile tests/test_mock_scope.cpp
+  includes = -I. -Itests
+  flags = -Wall -Werror -Wextra -g -std=c++14
+  DEPFILE = tests/test_mock_scope.o.dep
+
+build ut_cpp: _cpplink objs/ut_cpp.objs/tests/test_exceptions.o objs/ut_cpp.objs/tests/main.o objs/ut_cpp.objs/tests/test_traits.o objs/ut_cpp.objs/tests/test_mock_scope.o
 
 build objs/example_d.objs/example/d/mock_network.o: _dcompile example/d/mock_network.d
   includes = -I. -I. -Iexample/d
   flags = -g -unittest
   DEPFILE = example/d/mock_network.o.dep
 
-build objs/example_d.objs/example/d/test.o: _dcompile example/d/test.d
-  includes = -I. -I. -Iexample/d
-  flags = -g -unittest
-  DEPFILE = example/d/test.o.dep
-
 build objs/example_d.objs/example/d/mocks.o: _dcompile example/d/mocks.d
   includes = -I. -I. -Iexample/d
   flags = -g -unittest
   DEPFILE = example/d/mocks.o.dep
+
+build objs/example_d.objs/example/d/mock_other.o: _dcompile example/d/mock_other.d
+  includes = -I. -I. -Iexample/d
+  flags = -g -unittest
+  DEPFILE = example/d/mock_other.o.dep
+
+build objs/example_d.objs/example/d/test.o: _dcompile example/d/test.d
+  includes = -I. -I. -Iexample/d
+  flags = -g -unittest
+  DEPFILE = example/d/test.o.dep
 
 build objs/example_d.objs/premock.o: _dcompile premock.d
   includes = -I. -I. -Iexample/d
   flags = -g -unittest
   DEPFILE = premock.o.dep
 
-build objs/example_d.objs/example/src/cpp_prod.o: _cppcompile example/src/cpp_prod.cpp
-  includes = -I. -Iexample/cpp/test -Iexample/src -Iexample/deps -Iexample/cpp/mocks
-  flags = -Wall -Werror -Wextra -g -include mocks.h
-  DEPFILE = example/src/cpp_prod.o.dep
-
 build objs/example_d.objs/example/src/prod.o: _ccompile example/src/prod.c
   includes = -I. -Iexample/cpp/test -Iexample/src -Iexample/deps -Iexample/cpp/mocks
   flags = -Wall -Werror -Wextra -g -include mocks.h
   DEPFILE = example/src/prod.o.dep
+
+build objs/example_d.objs/example/src/cpp_prod.o: _cppcompile example/src/cpp_prod.cpp
+  includes = -I. -Iexample/cpp/test -Iexample/src -Iexample/deps -Iexample/cpp/mocks
+  flags = -Wall -Werror -Wextra -g -include mocks.h
+  DEPFILE = example/src/cpp_prod.o.dep
 
 build objs/example_d.objs/example/deps/other.o: _ccompile example/deps/other.c
   flags = -Wall -Werror -Wextra -g
@@ -106,10 +106,7 @@ build objs/example_d.objs/example/deps/cpp_other.o: _cppcompile example/deps/cpp
   flags = -Wall -Werror -Wextra -g
   DEPFILE = example/deps/cpp_other.o.dep
 
-build example_d: _dlink objs/example_d.objs/example/d/mock_other.o objs/example_d.objs/example/d/mock_network.o objs/example_d.objs/example/d/test.o objs/example_d.objs/example/d/mocks.o objs/example_d.objs/premock.o objs/example_d.objs/example/src/cpp_prod.o objs/example_d.objs/example/src/prod.o objs/example_d.objs/example/deps/other.o objs/example_d.objs/example/deps/cpp_other.o
+build example_d: _dlink objs/example_d.objs/example/d/mock_network.o objs/example_d.objs/example/d/mocks.o objs/example_d.objs/example/d/mock_other.o objs/example_d.objs/example/d/test.o objs/example_d.objs/premock.o objs/example_d.objs/example/src/prod.o objs/example_d.objs/example/src/cpp_prod.o objs/example_d.objs/example/deps/other.o objs/example_d.objs/example/deps/cpp_other.o
   flags = -L-lstdc++
-
-build build.ninja: _rerun | /home/atila/coding/d/reggae/bin/reggae reggaefile.py
-  pool = console
 
 default example_cpp ut_cpp

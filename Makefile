@@ -15,16 +15,6 @@ objs/example_cpp.objs/example/cpp/test/test.o: example/cpp/test/test.cpp Makefil
 -include objs/example_cpp.objs/example/cpp/test/test.o.dep.P
 
 
-objs/example_cpp.objs/example/src/cpp_prod.o: example/src/cpp_prod.cpp Makefile
-	$(CXX) -Wall -Werror -Wextra -g -include mocks.h -I. -Iexample/cpp/test -Iexample/src -Iexample/deps -Iexample/cpp/mocks -MMD -MT objs/example_cpp.objs/example/src/cpp_prod.o -MF objs/example_cpp.objs/example/src/cpp_prod.o.dep -o objs/example_cpp.objs/example/src/cpp_prod.o -c example/src/cpp_prod.cpp
-	@cp objs/example_cpp.objs/example/src/cpp_prod.o.dep objs/example_cpp.objs/example/src/cpp_prod.o.dep.P; \
-    sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\$$//' \
-        -e '/^$$/ d' -e 's/$$/ :/' < objs/example_cpp.objs/example/src/cpp_prod.o.dep >> objs/example_cpp.objs/example/src/cpp_prod.o.dep.P; \
-    rm -f objs/example_cpp.objs/example/src/cpp_prod.o.dep
-
--include objs/example_cpp.objs/example/src/cpp_prod.o.dep.P
-
-
 objs/example_cpp.objs/example/src/prod.o: example/src/prod.c Makefile
 	$(CC) -Wall -Werror -Wextra -g -include mocks.h -I. -Iexample/cpp/test -Iexample/src -Iexample/deps -Iexample/cpp/mocks -MMD -MT objs/example_cpp.objs/example/src/prod.o -MF objs/example_cpp.objs/example/src/prod.o.dep -o objs/example_cpp.objs/example/src/prod.o -c example/src/prod.c
 	@cp objs/example_cpp.objs/example/src/prod.o.dep objs/example_cpp.objs/example/src/prod.o.dep.P; \
@@ -33,6 +23,16 @@ objs/example_cpp.objs/example/src/prod.o: example/src/prod.c Makefile
     rm -f objs/example_cpp.objs/example/src/prod.o.dep
 
 -include objs/example_cpp.objs/example/src/prod.o.dep.P
+
+
+objs/example_cpp.objs/example/src/cpp_prod.o: example/src/cpp_prod.cpp Makefile
+	$(CXX) -Wall -Werror -Wextra -g -include mocks.h -I. -Iexample/cpp/test -Iexample/src -Iexample/deps -Iexample/cpp/mocks -MMD -MT objs/example_cpp.objs/example/src/cpp_prod.o -MF objs/example_cpp.objs/example/src/cpp_prod.o.dep -o objs/example_cpp.objs/example/src/cpp_prod.o -c example/src/cpp_prod.cpp
+	@cp objs/example_cpp.objs/example/src/cpp_prod.o.dep objs/example_cpp.objs/example/src/cpp_prod.o.dep.P; \
+    sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\$$//' \
+        -e '/^$$/ d' -e 's/$$/ :/' < objs/example_cpp.objs/example/src/cpp_prod.o.dep >> objs/example_cpp.objs/example/src/cpp_prod.o.dep.P; \
+    rm -f objs/example_cpp.objs/example/src/cpp_prod.o.dep
+
+-include objs/example_cpp.objs/example/src/cpp_prod.o.dep.P
 
 
 objs/example_cpp.objs/example/deps/other.o: example/deps/other.c Makefile
@@ -55,16 +55,6 @@ objs/example_cpp.objs/example/deps/cpp_other.o: example/deps/cpp_other.cpp Makef
 -include objs/example_cpp.objs/example/deps/cpp_other.o.dep.P
 
 
-objs/example_cpp.objs/example/cpp/mocks/mock_network.o: example/cpp/mocks/mock_network.cpp Makefile
-	$(CXX) -Wall -Werror -Wextra -g -std=c++14 -I. -Iexample/cpp/test -Iexample/src -Iexample/deps -Iexample/cpp/mocks -MMD -MT objs/example_cpp.objs/example/cpp/mocks/mock_network.o -MF objs/example_cpp.objs/example/cpp/mocks/mock_network.o.dep -o objs/example_cpp.objs/example/cpp/mocks/mock_network.o -c example/cpp/mocks/mock_network.cpp
-	@cp objs/example_cpp.objs/example/cpp/mocks/mock_network.o.dep objs/example_cpp.objs/example/cpp/mocks/mock_network.o.dep.P; \
-    sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\$$//' \
-        -e '/^$$/ d' -e 's/$$/ :/' < objs/example_cpp.objs/example/cpp/mocks/mock_network.o.dep >> objs/example_cpp.objs/example/cpp/mocks/mock_network.o.dep.P; \
-    rm -f objs/example_cpp.objs/example/cpp/mocks/mock_network.o.dep
-
--include objs/example_cpp.objs/example/cpp/mocks/mock_network.o.dep.P
-
-
 objs/example_cpp.objs/example/cpp/mocks/mock_other.o: example/cpp/mocks/mock_other.cpp Makefile
 	$(CXX) -Wall -Werror -Wextra -g -std=c++14 -I. -Iexample/cpp/test -Iexample/src -Iexample/deps -Iexample/cpp/mocks -MMD -MT objs/example_cpp.objs/example/cpp/mocks/mock_other.o -MF objs/example_cpp.objs/example/cpp/mocks/mock_other.o.dep -o objs/example_cpp.objs/example/cpp/mocks/mock_other.o -c example/cpp/mocks/mock_other.cpp
 	@cp objs/example_cpp.objs/example/cpp/mocks/mock_other.o.dep objs/example_cpp.objs/example/cpp/mocks/mock_other.o.dep.P; \
@@ -73,6 +63,16 @@ objs/example_cpp.objs/example/cpp/mocks/mock_other.o: example/cpp/mocks/mock_oth
     rm -f objs/example_cpp.objs/example/cpp/mocks/mock_other.o.dep
 
 -include objs/example_cpp.objs/example/cpp/mocks/mock_other.o.dep.P
+
+
+objs/example_cpp.objs/example/cpp/mocks/mock_network.o: example/cpp/mocks/mock_network.cpp Makefile
+	$(CXX) -Wall -Werror -Wextra -g -std=c++14 -I. -Iexample/cpp/test -Iexample/src -Iexample/deps -Iexample/cpp/mocks -MMD -MT objs/example_cpp.objs/example/cpp/mocks/mock_network.o -MF objs/example_cpp.objs/example/cpp/mocks/mock_network.o.dep -o objs/example_cpp.objs/example/cpp/mocks/mock_network.o -c example/cpp/mocks/mock_network.cpp
+	@cp objs/example_cpp.objs/example/cpp/mocks/mock_network.o.dep objs/example_cpp.objs/example/cpp/mocks/mock_network.o.dep.P; \
+    sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\$$//' \
+        -e '/^$$/ d' -e 's/$$/ :/' < objs/example_cpp.objs/example/cpp/mocks/mock_network.o.dep >> objs/example_cpp.objs/example/cpp/mocks/mock_network.o.dep.P; \
+    rm -f objs/example_cpp.objs/example/cpp/mocks/mock_network.o.dep
+
+-include objs/example_cpp.objs/example/cpp/mocks/mock_network.o.dep.P
 
 
 objs/example_cpp.objs/example/cpp/mocks/mock_cpp.o: example/cpp/mocks/mock_cpp.cpp Makefile
@@ -85,8 +85,18 @@ objs/example_cpp.objs/example/cpp/mocks/mock_cpp.o: example/cpp/mocks/mock_cpp.c
 -include objs/example_cpp.objs/example/cpp/mocks/mock_cpp.o.dep.P
 
 
-example_cpp: objs/example_cpp.objs/example/cpp/test/test.o objs/example_cpp.objs/example/src/cpp_prod.o objs/example_cpp.objs/example/src/prod.o objs/example_cpp.objs/example/deps/other.o objs/example_cpp.objs/example/deps/cpp_other.o objs/example_cpp.objs/example/cpp/mocks/mock_network.o objs/example_cpp.objs/example/cpp/mocks/mock_other.o objs/example_cpp.objs/example/cpp/mocks/mock_cpp.o Makefile
-	$(CXX) -o example_cpp  objs/example_cpp.objs/example/cpp/test/test.o objs/example_cpp.objs/example/src/cpp_prod.o objs/example_cpp.objs/example/src/prod.o objs/example_cpp.objs/example/deps/other.o objs/example_cpp.objs/example/deps/cpp_other.o objs/example_cpp.objs/example/cpp/mocks/mock_network.o objs/example_cpp.objs/example/cpp/mocks/mock_other.o objs/example_cpp.objs/example/cpp/mocks/mock_cpp.o
+example_cpp: objs/example_cpp.objs/example/cpp/test/test.o objs/example_cpp.objs/example/src/prod.o objs/example_cpp.objs/example/src/cpp_prod.o objs/example_cpp.objs/example/deps/other.o objs/example_cpp.objs/example/deps/cpp_other.o objs/example_cpp.objs/example/cpp/mocks/mock_other.o objs/example_cpp.objs/example/cpp/mocks/mock_network.o objs/example_cpp.objs/example/cpp/mocks/mock_cpp.o Makefile
+	$(CXX) -o example_cpp  objs/example_cpp.objs/example/cpp/test/test.o objs/example_cpp.objs/example/src/prod.o objs/example_cpp.objs/example/src/cpp_prod.o objs/example_cpp.objs/example/deps/other.o objs/example_cpp.objs/example/deps/cpp_other.o objs/example_cpp.objs/example/cpp/mocks/mock_other.o objs/example_cpp.objs/example/cpp/mocks/mock_network.o objs/example_cpp.objs/example/cpp/mocks/mock_cpp.o
+objs/ut_cpp.objs/tests/test_exceptions.o: tests/test_exceptions.cpp Makefile
+	$(CXX) -Wall -Werror -Wextra -g -std=c++14 -I. -Itests -MMD -MT objs/ut_cpp.objs/tests/test_exceptions.o -MF objs/ut_cpp.objs/tests/test_exceptions.o.dep -o objs/ut_cpp.objs/tests/test_exceptions.o -c tests/test_exceptions.cpp
+	@cp objs/ut_cpp.objs/tests/test_exceptions.o.dep objs/ut_cpp.objs/tests/test_exceptions.o.dep.P; \
+    sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\$$//' \
+        -e '/^$$/ d' -e 's/$$/ :/' < objs/ut_cpp.objs/tests/test_exceptions.o.dep >> objs/ut_cpp.objs/tests/test_exceptions.o.dep.P; \
+    rm -f objs/ut_cpp.objs/tests/test_exceptions.o.dep
+
+-include objs/ut_cpp.objs/tests/test_exceptions.o.dep.P
+
+
 objs/ut_cpp.objs/tests/main.o: tests/main.cpp Makefile
 	$(CXX) -Wall -Werror -Wextra -g -std=c++14 -I. -Itests -MMD -MT objs/ut_cpp.objs/tests/main.o -MF objs/ut_cpp.objs/tests/main.o.dep -o objs/ut_cpp.objs/tests/main.o -c tests/main.cpp
 	@cp objs/ut_cpp.objs/tests/main.o.dep objs/ut_cpp.objs/tests/main.o.dep.P; \
@@ -95,16 +105,6 @@ objs/ut_cpp.objs/tests/main.o: tests/main.cpp Makefile
     rm -f objs/ut_cpp.objs/tests/main.o.dep
 
 -include objs/ut_cpp.objs/tests/main.o.dep.P
-
-
-objs/ut_cpp.objs/tests/test_mock_scope.o: tests/test_mock_scope.cpp Makefile
-	$(CXX) -Wall -Werror -Wextra -g -std=c++14 -I. -Itests -MMD -MT objs/ut_cpp.objs/tests/test_mock_scope.o -MF objs/ut_cpp.objs/tests/test_mock_scope.o.dep -o objs/ut_cpp.objs/tests/test_mock_scope.o -c tests/test_mock_scope.cpp
-	@cp objs/ut_cpp.objs/tests/test_mock_scope.o.dep objs/ut_cpp.objs/tests/test_mock_scope.o.dep.P; \
-    sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\$$//' \
-        -e '/^$$/ d' -e 's/$$/ :/' < objs/ut_cpp.objs/tests/test_mock_scope.o.dep >> objs/ut_cpp.objs/tests/test_mock_scope.o.dep.P; \
-    rm -f objs/ut_cpp.objs/tests/test_mock_scope.o.dep
-
--include objs/ut_cpp.objs/tests/test_mock_scope.o.dep.P
 
 
 objs/ut_cpp.objs/tests/test_traits.o: tests/test_traits.cpp Makefile
@@ -117,28 +117,18 @@ objs/ut_cpp.objs/tests/test_traits.o: tests/test_traits.cpp Makefile
 -include objs/ut_cpp.objs/tests/test_traits.o.dep.P
 
 
-objs/ut_cpp.objs/tests/test_exceptions.o: tests/test_exceptions.cpp Makefile
-	$(CXX) -Wall -Werror -Wextra -g -std=c++14 -I. -Itests -MMD -MT objs/ut_cpp.objs/tests/test_exceptions.o -MF objs/ut_cpp.objs/tests/test_exceptions.o.dep -o objs/ut_cpp.objs/tests/test_exceptions.o -c tests/test_exceptions.cpp
-	@cp objs/ut_cpp.objs/tests/test_exceptions.o.dep objs/ut_cpp.objs/tests/test_exceptions.o.dep.P; \
+objs/ut_cpp.objs/tests/test_mock_scope.o: tests/test_mock_scope.cpp Makefile
+	$(CXX) -Wall -Werror -Wextra -g -std=c++14 -I. -Itests -MMD -MT objs/ut_cpp.objs/tests/test_mock_scope.o -MF objs/ut_cpp.objs/tests/test_mock_scope.o.dep -o objs/ut_cpp.objs/tests/test_mock_scope.o -c tests/test_mock_scope.cpp
+	@cp objs/ut_cpp.objs/tests/test_mock_scope.o.dep objs/ut_cpp.objs/tests/test_mock_scope.o.dep.P; \
     sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\$$//' \
-        -e '/^$$/ d' -e 's/$$/ :/' < objs/ut_cpp.objs/tests/test_exceptions.o.dep >> objs/ut_cpp.objs/tests/test_exceptions.o.dep.P; \
-    rm -f objs/ut_cpp.objs/tests/test_exceptions.o.dep
+        -e '/^$$/ d' -e 's/$$/ :/' < objs/ut_cpp.objs/tests/test_mock_scope.o.dep >> objs/ut_cpp.objs/tests/test_mock_scope.o.dep.P; \
+    rm -f objs/ut_cpp.objs/tests/test_mock_scope.o.dep
 
--include objs/ut_cpp.objs/tests/test_exceptions.o.dep.P
-
-
-ut_cpp: objs/ut_cpp.objs/tests/main.o objs/ut_cpp.objs/tests/test_mock_scope.o objs/ut_cpp.objs/tests/test_traits.o objs/ut_cpp.objs/tests/test_exceptions.o Makefile
-	$(CXX) -o ut_cpp  objs/ut_cpp.objs/tests/main.o objs/ut_cpp.objs/tests/test_mock_scope.o objs/ut_cpp.objs/tests/test_traits.o objs/ut_cpp.objs/tests/test_exceptions.o
-objs/example_d.objs/example/d/mock_other.o: example/d/mock_other.d Makefile
-	.reggae/dcompile --objFile=objs/example_d.objs/example/d/mock_other.o --depFile=objs/example_d.objs/example/d/mock_other.o.dep $(DC) -g -unittest -I. -I. -Iexample/d  example/d/mock_other.d
-	@cp objs/example_d.objs/example/d/mock_other.o.dep objs/example_d.objs/example/d/mock_other.o.dep.P; \
-    sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\$$//' \
-        -e '/^$$/ d' -e 's/$$/ :/' < objs/example_d.objs/example/d/mock_other.o.dep >> objs/example_d.objs/example/d/mock_other.o.dep.P; \
-    rm -f objs/example_d.objs/example/d/mock_other.o.dep
-
--include objs/example_d.objs/example/d/mock_other.o.dep.P
+-include objs/ut_cpp.objs/tests/test_mock_scope.o.dep.P
 
 
+ut_cpp: objs/ut_cpp.objs/tests/test_exceptions.o objs/ut_cpp.objs/tests/main.o objs/ut_cpp.objs/tests/test_traits.o objs/ut_cpp.objs/tests/test_mock_scope.o Makefile
+	$(CXX) -o ut_cpp  objs/ut_cpp.objs/tests/test_exceptions.o objs/ut_cpp.objs/tests/main.o objs/ut_cpp.objs/tests/test_traits.o objs/ut_cpp.objs/tests/test_mock_scope.o
 objs/example_d.objs/example/d/mock_network.o: example/d/mock_network.d Makefile
 	.reggae/dcompile --objFile=objs/example_d.objs/example/d/mock_network.o --depFile=objs/example_d.objs/example/d/mock_network.o.dep $(DC) -g -unittest -I. -I. -Iexample/d  example/d/mock_network.d
 	@cp objs/example_d.objs/example/d/mock_network.o.dep objs/example_d.objs/example/d/mock_network.o.dep.P; \
@@ -147,16 +137,6 @@ objs/example_d.objs/example/d/mock_network.o: example/d/mock_network.d Makefile
     rm -f objs/example_d.objs/example/d/mock_network.o.dep
 
 -include objs/example_d.objs/example/d/mock_network.o.dep.P
-
-
-objs/example_d.objs/example/d/test.o: example/d/test.d Makefile
-	.reggae/dcompile --objFile=objs/example_d.objs/example/d/test.o --depFile=objs/example_d.objs/example/d/test.o.dep $(DC) -g -unittest -I. -I. -Iexample/d  example/d/test.d
-	@cp objs/example_d.objs/example/d/test.o.dep objs/example_d.objs/example/d/test.o.dep.P; \
-    sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\$$//' \
-        -e '/^$$/ d' -e 's/$$/ :/' < objs/example_d.objs/example/d/test.o.dep >> objs/example_d.objs/example/d/test.o.dep.P; \
-    rm -f objs/example_d.objs/example/d/test.o.dep
-
--include objs/example_d.objs/example/d/test.o.dep.P
 
 
 objs/example_d.objs/example/d/mocks.o: example/d/mocks.d Makefile
@@ -169,6 +149,26 @@ objs/example_d.objs/example/d/mocks.o: example/d/mocks.d Makefile
 -include objs/example_d.objs/example/d/mocks.o.dep.P
 
 
+objs/example_d.objs/example/d/mock_other.o: example/d/mock_other.d Makefile
+	.reggae/dcompile --objFile=objs/example_d.objs/example/d/mock_other.o --depFile=objs/example_d.objs/example/d/mock_other.o.dep $(DC) -g -unittest -I. -I. -Iexample/d  example/d/mock_other.d
+	@cp objs/example_d.objs/example/d/mock_other.o.dep objs/example_d.objs/example/d/mock_other.o.dep.P; \
+    sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\$$//' \
+        -e '/^$$/ d' -e 's/$$/ :/' < objs/example_d.objs/example/d/mock_other.o.dep >> objs/example_d.objs/example/d/mock_other.o.dep.P; \
+    rm -f objs/example_d.objs/example/d/mock_other.o.dep
+
+-include objs/example_d.objs/example/d/mock_other.o.dep.P
+
+
+objs/example_d.objs/example/d/test.o: example/d/test.d Makefile
+	.reggae/dcompile --objFile=objs/example_d.objs/example/d/test.o --depFile=objs/example_d.objs/example/d/test.o.dep $(DC) -g -unittest -I. -I. -Iexample/d  example/d/test.d
+	@cp objs/example_d.objs/example/d/test.o.dep objs/example_d.objs/example/d/test.o.dep.P; \
+    sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\$$//' \
+        -e '/^$$/ d' -e 's/$$/ :/' < objs/example_d.objs/example/d/test.o.dep >> objs/example_d.objs/example/d/test.o.dep.P; \
+    rm -f objs/example_d.objs/example/d/test.o.dep
+
+-include objs/example_d.objs/example/d/test.o.dep.P
+
+
 objs/example_d.objs/premock.o: premock.d Makefile
 	.reggae/dcompile --objFile=objs/example_d.objs/premock.o --depFile=objs/example_d.objs/premock.o.dep $(DC) -g -unittest -I. -I. -Iexample/d  premock.d
 	@cp objs/example_d.objs/premock.o.dep objs/example_d.objs/premock.o.dep.P; \
@@ -179,16 +179,6 @@ objs/example_d.objs/premock.o: premock.d Makefile
 -include objs/example_d.objs/premock.o.dep.P
 
 
-objs/example_d.objs/example/src/cpp_prod.o: example/src/cpp_prod.cpp Makefile
-	$(CXX) -Wall -Werror -Wextra -g -include mocks.h -I. -Iexample/cpp/test -Iexample/src -Iexample/deps -Iexample/cpp/mocks -MMD -MT objs/example_d.objs/example/src/cpp_prod.o -MF objs/example_d.objs/example/src/cpp_prod.o.dep -o objs/example_d.objs/example/src/cpp_prod.o -c example/src/cpp_prod.cpp
-	@cp objs/example_d.objs/example/src/cpp_prod.o.dep objs/example_d.objs/example/src/cpp_prod.o.dep.P; \
-    sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\$$//' \
-        -e '/^$$/ d' -e 's/$$/ :/' < objs/example_d.objs/example/src/cpp_prod.o.dep >> objs/example_d.objs/example/src/cpp_prod.o.dep.P; \
-    rm -f objs/example_d.objs/example/src/cpp_prod.o.dep
-
--include objs/example_d.objs/example/src/cpp_prod.o.dep.P
-
-
 objs/example_d.objs/example/src/prod.o: example/src/prod.c Makefile
 	$(CC) -Wall -Werror -Wextra -g -include mocks.h -I. -Iexample/cpp/test -Iexample/src -Iexample/deps -Iexample/cpp/mocks -MMD -MT objs/example_d.objs/example/src/prod.o -MF objs/example_d.objs/example/src/prod.o.dep -o objs/example_d.objs/example/src/prod.o -c example/src/prod.c
 	@cp objs/example_d.objs/example/src/prod.o.dep objs/example_d.objs/example/src/prod.o.dep.P; \
@@ -197,6 +187,16 @@ objs/example_d.objs/example/src/prod.o: example/src/prod.c Makefile
     rm -f objs/example_d.objs/example/src/prod.o.dep
 
 -include objs/example_d.objs/example/src/prod.o.dep.P
+
+
+objs/example_d.objs/example/src/cpp_prod.o: example/src/cpp_prod.cpp Makefile
+	$(CXX) -Wall -Werror -Wextra -g -include mocks.h -I. -Iexample/cpp/test -Iexample/src -Iexample/deps -Iexample/cpp/mocks -MMD -MT objs/example_d.objs/example/src/cpp_prod.o -MF objs/example_d.objs/example/src/cpp_prod.o.dep -o objs/example_d.objs/example/src/cpp_prod.o -c example/src/cpp_prod.cpp
+	@cp objs/example_d.objs/example/src/cpp_prod.o.dep objs/example_d.objs/example/src/cpp_prod.o.dep.P; \
+    sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\$$//' \
+        -e '/^$$/ d' -e 's/$$/ :/' < objs/example_d.objs/example/src/cpp_prod.o.dep >> objs/example_d.objs/example/src/cpp_prod.o.dep.P; \
+    rm -f objs/example_d.objs/example/src/cpp_prod.o.dep
+
+-include objs/example_d.objs/example/src/cpp_prod.o.dep.P
 
 
 objs/example_d.objs/example/deps/other.o: example/deps/other.c Makefile
@@ -219,5 +219,5 @@ objs/example_d.objs/example/deps/cpp_other.o: example/deps/cpp_other.cpp Makefil
 -include objs/example_d.objs/example/deps/cpp_other.o.dep.P
 
 
-example_d: objs/example_d.objs/example/d/mock_other.o objs/example_d.objs/example/d/mock_network.o objs/example_d.objs/example/d/test.o objs/example_d.objs/example/d/mocks.o objs/example_d.objs/premock.o objs/example_d.objs/example/src/cpp_prod.o objs/example_d.objs/example/src/prod.o objs/example_d.objs/example/deps/other.o objs/example_d.objs/example/deps/cpp_other.o Makefile
-	$(DC) -ofexample_d -L-lstdc++ objs/example_d.objs/example/d/mock_other.o objs/example_d.objs/example/d/mock_network.o objs/example_d.objs/example/d/test.o objs/example_d.objs/example/d/mocks.o objs/example_d.objs/premock.o objs/example_d.objs/example/src/cpp_prod.o objs/example_d.objs/example/src/prod.o objs/example_d.objs/example/deps/other.o objs/example_d.objs/example/deps/cpp_other.o
+example_d: objs/example_d.objs/example/d/mock_network.o objs/example_d.objs/example/d/mocks.o objs/example_d.objs/example/d/mock_other.o objs/example_d.objs/example/d/test.o objs/example_d.objs/premock.o objs/example_d.objs/example/src/prod.o objs/example_d.objs/example/src/cpp_prod.o objs/example_d.objs/example/deps/other.o objs/example_d.objs/example/deps/cpp_other.o Makefile
+	$(DC) -ofexample_d -L-lstdc++ objs/example_d.objs/example/d/mock_network.o objs/example_d.objs/example/d/mocks.o objs/example_d.objs/example/d/mock_other.o objs/example_d.objs/example/d/test.o objs/example_d.objs/premock.o objs/example_d.objs/example/src/prod.o objs/example_d.objs/example/src/cpp_prod.o objs/example_d.objs/example/deps/other.o objs/example_d.objs/example/deps/cpp_other.o

@@ -10,3 +10,4 @@ __pycache__
 .dir-locals.el
 compile_commands.json
 objs
+*.pyc
