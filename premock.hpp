@@ -424,7 +424,11 @@ private:
     template<int N, typename A>
     std::enable_if_t<!std::is_pointer<std::remove_reference_t<A>>::value || !CanBeOverwritten<A>::value>
     setOutputParameters(A) { }
+
+    template<int N>
+    void setOutputParameters() { }
 };
+
 
 
 /**

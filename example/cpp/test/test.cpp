@@ -94,6 +94,10 @@ int main() {
         REPLACE(other_three, [](auto...) { return 0; });
     }
 
+    {
+        auto m = MOCK(other_zero);
+    }
+
 
     cout << "Ok C++ Example" << endl;
 }
