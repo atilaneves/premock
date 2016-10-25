@@ -89,6 +89,11 @@ int main() {
         m.expectCalled().withValues(5);
     }
 
+    {
+        REPLACE(other_two, [](auto...) { return 0; });
+        REPLACE(other_three, [](auto...) { return 0; });
+    }
+
 
     cout << "Ok C++ Example" << endl;
 }

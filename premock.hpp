@@ -137,6 +137,9 @@ MockScope<T> mockScope(T& func, F scopeFunc) {
     return {func, scopeFunc};
 }
 
+#define CONCATENATE_DETAIL(x, y) x##y
+#define CONCATENATE(x, y) CONCATENATE_DETAIL(x, y)
+#define MAKE_UNIQUE(x) CONCATENATE(x, __LINE__)
 /**
  Temporarily replace func with the passed-in lambda:
  e.g.
@@ -146,7 +149,7 @@ MockScope<T> mockScope(T& func, F scopeFunc) {
  This causes every call to `send` in the production code to
  return -1 no matter what
  */
-#define REPLACE(func, lambda) auto _ = mockScope(mock_##func, lambda)
+#define REPLACE(func, lambda) auto MAKE_UNIQUE(_) = mockScope(mock_##func, lambda)
 
 template<typename T>
 struct Slice {
