@@ -181,11 +181,21 @@ public:
     std::string _what;
 };
 
+// Visual Studio, you make life so "interesting"...
+#ifdef _MSC_VER
+#    if _MSC_VER < 1910
+#        define PREMOCK_NEED_VOID_T
+#    endif
+#else
+#    if __cplusplus < 201703L  // look ma, standards!
+#        define PREMOCK_NEED_VOID_T
+#    endif
+#endif
 
-#if __cplusplus < 201703L
+#ifdef PREMOCK_NEED_VOID_T
 namespace std {
-template<typename... Ts> struct make_void { typedef void type;};
-template<typename... Ts> using void_t = typename make_void<Ts...>::type;
+    template<typename... Ts> struct make_void { typedef void type;};
+    template<typename... Ts> using void_t = typename make_void<Ts...>::type;
 }
 #endif
 
