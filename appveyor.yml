@@ -1,13 +1,12 @@
 platform: x64
 image:
-  - Visual Studio 2013
-  - Visual Studio 2015
   - Visual Studio 2017
 
 skip_tags: true
 
 build_script:
- - echo dummy build script - do not remove me
+  - echo dummy build script - do not remove me
 
 test_script:
- - cl /c check_windows.cpp
+  - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
+  - cl /c check_windows.cpp
