@@ -1,0 +1,13 @@
+platform: x64
+image:
+  - Visual Studio 2013
+  - Visual Studio 2015
+  - Visual Studio 2017
+
+skip_tags: true
+
+build_script:
+ - msbuild
+
+test_script:
+ - cl /c check_windows.cpp
