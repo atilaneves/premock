@@ -4,8 +4,6 @@ premock
 | [![Build Status](https://travis-ci.org/atilaneves/premock.png?branch=master)](https://travis-ci.org/atilaneves/premock) |  [![Build Status](https://ci.appveyor.com/api/projects/status/github/atilaneves/premock?branch=master&svg=true)](https://ci.appveyor.com/project/atilaneves/premock) |
 
 
-[![Build Status](https://travis-ci.org/atilaneves/premock.png?branch=master)](https://travis-ci.org/atilaneves/premock)
-
 This header-only (C++) / single-module (D) library makes it possible
 to replace implementations of C and C++ functions with C++ or D
 callables for unit testing.
