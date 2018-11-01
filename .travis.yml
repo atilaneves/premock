@@ -3,7 +3,7 @@
 # Then modified as required
 
 sudo: required
-dist: precise
+dist: trusty
 language: cpp
 
 matrix:
@@ -31,8 +31,12 @@ matrix:
         - CXX_COMPILER=clang++-3.7
 
 install:
-  - ./mkdirs.sh
+  - build/install.sh
+  - source ~/dlang/dmd-2.082.1/activate
 
 script:
   - make CC=$CC_COMPILER CXX=$CXX_COMPILER
-  - ./test.sh
+  - dub fetch reggae
+  - dub run reggae -- -b make
+  - make example_d
+  - ./test.sh d
