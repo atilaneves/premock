@@ -5,8 +5,14 @@ premock
 
 
 This header-only (C++) / single-module (D) library makes it possible
-to replace implementations of C and C++ functions with C++ or D
-callables for unit testing.
+to replace implementations of C functions (and C++ free functions)
+with C++ or D callables (functions, lambdas, function objects) for
+unit testing.
+
+The motivation for premock is to write new tests for legacy C
+codebases that were not written with testability in mind.  The example
+with `send` below is indicative of that. I would expect newly written
+code to not have a hard-coded IO call in the middle of its implementation.
 
 It works by using the preprocessor to redefine the functions to be
 mocked in the files to be tested by prepending `ut_` to them instead

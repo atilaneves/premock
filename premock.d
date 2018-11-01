@@ -323,7 +323,7 @@ version(unittest) {
 @("output C string") unittest {
     bool delegate(int input, char* output) mock_output_string;
     string returnString(int i) {
-        static char buf[200] = "deadbeef";
+        static char[200] buf = "deadbeef";
         mock_output_string(i, buf.ptr);
         import std.string;
         import std.conv: to;
