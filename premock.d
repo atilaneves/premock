@@ -365,7 +365,7 @@ private mixin template DeclareMock(string func, R, T...) {
 }
 
 private mixin template ImplementUtFunc(string func, R, T...) {
-    mixin(`pragma(mangle, "ut_` ~ func ~ `")` ~ q{ extern(C) R ut_} ~ func ~ typeAndArgsParens!T ~ " { " ~
+    mixin(`pragma(mangle, "ut_premock_` ~ func ~ `")` ~ q{ extern(C) R ut_premock_} ~ func ~ typeAndArgsParens!T ~ " { " ~
           q{ return mock_} ~ func ~ argNamesParens(T.length) ~ ";" ~
           `}`);
 }
@@ -391,7 +391,7 @@ string implCppMockStr(string func, R, T...)() {
                             `    mock_` ~ func ~ ` = ` ~ argNamesParens(T.length) ~ ` => ` ~ func ~
         argNamesParens(T.length) ~ ";\n" ~
                             "}\n" ~
-                              "extern(C++) " ~ R.stringof ~ " ut_" ~ func ~ typeAndArgsParens!T ~ " {\n" ~
+                              "extern(C++) " ~ R.stringof ~ " ut_premock_" ~ func ~ typeAndArgsParens!T ~ " {\n" ~
                             "    return mock_" ~ func ~ argNamesParens(T.length) ~ ";\n" ~
                             "}";
 

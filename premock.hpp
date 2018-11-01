@@ -3,8 +3,8 @@ This header library makes it possible to replace implementations of C
 functions with C++ callables for unit testing.
 
 It works by using the preprocessor to redefine the functions to be
-mocked in the files to be tested by prepending `ut_` to them instead
-of calling the "real" implementation. This `ut_` function then
+mocked in the files to be tested by prepending `ut_premock_` to them instead
+of calling the "real" implementation. This `ut_premock_` function then
 forwards to a `std::function` of the appropriate type that can be
 changed at runtime to a C++ callable.
 
@@ -15,7 +15,7 @@ have a header like this:
 ```c
 #ifndef MOCK_NETWORK_H
 #define MOCK_NETWORK_H
-#    define send ut_send
+#    define send ut_premock_send
 #endif
 ```
 
@@ -24,8 +24,8 @@ The build system would then insert this header before any other
 This could also be done with `-D` but in the case of multiple
 functions it's easier to have all the redefinitions in one header.
 
-Now all calls to `send` are actually to `ut_send`. This will fail to
-link since `ut_send` doesn't exist. To implement it, the test binary
+Now all calls to `send` are actually to `ut_premock_send`. This will fail to
+link since `ut_premock_send` doesn't exist. To implement it, the test binary
 should be linked with an object file from compiling this code
 (e.g. called `mock_network.cpp`):
 
@@ -521,12 +521,12 @@ struct FunctionTraits<R(*)(A...)> {
 #define MOCK_STORAGE_DEFAULT(func) thread_local decltype(mock_##func) mock_##func = func
 
 /**
- A name for the ut_ function argument at position index
+ A name for the ut_premock_ function argument at position index
  */
 #define UT_FUNC_ARG(index) arg_##index
 
 /**
- Type and name for ut_ function argument at position index. If foo has signature:
+ Type and name for ut_premock_ function argument at position index. If foo has signature:
 
  int foo(int, float);
 
@@ -539,12 +539,12 @@ struct FunctionTraits<R(*)(A...)> {
 
 
 /**
- Helper macros to generate the code for the ut_ functions.
+ Helper macros to generate the code for the ut_premock_ functions.
 
  UT_FUNC_ARGS_N generates the parameter list in the function declaration,
  with types and parameter names, e.g. (int arg0, float arg1, ...)
 
- UT_FUNC_FWD_N generates just the parameter names so that the ut_
+ UT_FUNC_FWD_N generates just the parameter names so that the ut_premock_
  function can forward the call to the equivalent mock_, e.g.
  (arg0, arg1, ...)
 
@@ -588,18 +588,18 @@ struct FunctionTraits<R(*)(A...)> {
 
  1. Define the global mock_func std::function variable to hold the current implementation
  2. Assign this global to a pointer to the "real" implementation
- 3. Writes the ut_ function called by production code to automatically forward to the mock
+ 3. Writes the ut_premock_ function called by production code to automatically forward to the mock
 
  The number of arguments that the function takes must be specified. This could be deduced
  with template metaprogramming but there is no way to feed that information back to
  the preprocessor. Since the production calling code thinks it's calling a function
- whose name begins with ut_, that function must exist or there'll be a linker error.
+ whose name begins with ut_premock_, that function must exist or there'll be a linker error.
  The only way to not have to write the function by hand is to use the preprocessor.
 
  An example of a call to IMPL_MOCK(4, send) (where send is the BSD socket function)
  assuming the macro is used in an extern "C" block:
 
- extern "C" ssize_t ut_send(int arg0, const void* arg1, size_t arg2, int arg3) {
+ extern "C" ssize_t ut_premock_send(int arg0, const void* arg1, size_t arg2, int arg3) {
      return mock_send(arg0, arg1, arg2, arg3);
  }
  std::function<ssize_t(int, const void*, size_t, int)> mock_send = send
@@ -607,7 +607,7 @@ struct FunctionTraits<R(*)(A...)> {
 
  */
 #define IMPL_MOCK_DEFAULT(num_args, func) \
-    FunctionTraits<decltype(&func)>::ReturnType ut_##func(UT_FUNC_ARGS_##num_args(func)) { \
+    FunctionTraits<decltype(&func)>::ReturnType ut_premock_##func(UT_FUNC_ARGS_##num_args(func)) { \
         return mock_##func(UT_FUNC_FWD_##num_args); \
     } \
     MOCK_STORAGE_DEFAULT(func)
@@ -620,18 +620,18 @@ struct FunctionTraits<R(*)(A...)> {
 
  1. Define the global mock_func std::function variable to hold the current implementation
  2. Assign this global to a pointer to the "real" implementation
- 3. Writes the ut_ function called by production code to automatically forward to the mock
+ 3. Writes the ut_premock_ function called by production code to automatically forward to the mock
 
  The number of arguments that the function takes must be specified. This could be deduced
  with template metaprogramming but there is no way to feed that information back to
  the preprocessor. Since the production calling code thinks it's calling a function
- whose name begins with ut_, that function must exist or there'll be a linker error.
+ whose name begins with ut_premock_, that function must exist or there'll be a linker error.
  The only way to not have to write the function by hand is to use the preprocessor.
 
  An example of a call to IMPL_MOCK(4, send) (where send is the BSD socket function)
  assuming the macro is used in an extern "C" block:
 
- extern "C" ssize_t ut_send(int arg0, const void* arg1, size_t arg2, int arg3) {
+ extern "C" ssize_t ut_premock_send(int arg0, const void* arg1, size_t arg2, int arg3) {
      return mock_send(arg0, arg1, arg2, arg3);
  }
  std::function<ssize_t(int, const void*, size_t, int)> mock_send = send
@@ -639,7 +639,7 @@ struct FunctionTraits<R(*)(A...)> {
 
  */
 #define IMPL_MOCK(num_args, func) \
-    FunctionTraits<decltype(&func)>::ReturnType ut_##func(UT_FUNC_ARGS_##num_args(func)) { \
+    FunctionTraits<decltype(&func)>::ReturnType ut_premock_##func(UT_FUNC_ARGS_##num_args(func)) { \
         return mock_##func(UT_FUNC_FWD_##num_args); \
     } \
     MOCK_STORAGE(func)
