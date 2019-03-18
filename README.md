@@ -15,8 +15,8 @@ with `send` below is indicative of that. I would expect newly written
 code to not have a hard-coded IO call in the middle of its implementation.
 
 It works by using the preprocessor to redefine the functions to be
-mocked in the files to be tested by prepending `ut_` to them instead
-of calling the "real" implementation. This `ut_` function then
+mocked in the files to be tested by prepending `ut_premock_` to them instead
+of calling the "real" implementation. This `ut_premock_` function then
 forwards to a `std::function` / `delegate` of the appropriate type
 that can be changed at runtime to a C++/D callable, respectively.
 
@@ -27,7 +27,7 @@ have a header like this:
 ```c
 #ifndef MOCK_NETWORK_H
 #define MOCK_NETWORK_H
-#    define send ut_send
+#    define send ut_premock_send
 #endif
 ```
 
@@ -36,8 +36,8 @@ The build system would then insert this header before any other
 This could also be done with `-D` but in the case of multiple
 functions it's easier to have all the redefinitions in one header.
 
-Now all calls to `send` are actually to `ut_send`. This will fail to
-link since `ut_send` doesn't exist. To implement it in C++ (see below
+Now all calls to `send` are actually to `ut_premock_send`. This will fail to
+link since `ut_premock_send` doesn't exist. To implement it in C++ (see below
 for D), the test binary should be linked with an object file from
 compiling this code (e.g. called `mock_network.cpp`):
 
