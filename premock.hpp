@@ -187,7 +187,7 @@ public:
 #        define PREMOCK_NEED_VOID_T
 #    endif
 #else
-#    if __cplusplus < 201703L  // look ma, standards!
+#    ifndef __cpp_lib_void_t
 #        define PREMOCK_NEED_VOID_T
 #    endif
 #endif
